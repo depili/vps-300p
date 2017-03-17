@@ -1,0 +1,173 @@
+R1: Ping1?
+T1: Ping3?
+R2: Ping1?
+T2: Ping2?
+R1: Ping1?
+T1: Ping3?
+R2: Ping1?
+T2: Ping2?
+R1: PST button ACK
+T1: Crosspoint lamp: 65 04 00
+R1: PST button ACK
+T1: Crosspoint lamp: 64 04 00
+R1: Ping1?
+T1: Ping3?
+R1: PST button ACK
+T1: Crosspoint lamp: 65 06 00
+R2: Ping1?
+T2: Ping2?
+R1: PST button ACK
+T1: Crosspoint lamp: 64 06 00
+R1: PST button ACK
+T1: Crosspoint lamp: 64 07 00
+R1: Ping1?
+T1: Ping3?
+R1: PST button ACK
+T1: Crosspoint lamp: 64 02 00
+R1: PST button ACK
+T1: Crosspoint lamp: 65 07 00
+R2: Ping1?
+T2: Ping2?
+R1: PST button ACK
+T1: Crosspoint lamp: 65 08 00
+R1: Ping1?
+T1: Ping3?
+R2: Ping1?
+T2: Ping2?
+R1: Analog T-bar value: 0025
+R1: Analog T-bar value: 0055
+R1: Analog T-bar value: 0080
+T1: Crosspoint lamp: 65 48 00
+R1: Analog T-bar value: 0108
+R1: Analog T-bar value: 0127
+R1: Analog T-bar value: 0149
+R1: Analog T-bar value: 0177
+R1: Analog T-bar value: 0198
+R1: Analog T-bar value: 0229
+R1: Analog T-bar value: 0259
+R1: Analog T-bar value: 0288
+R1: Analog T-bar value: 0321
+R1: Analog T-bar value: 0354
+R1: Analog T-bar value: 0383
+R1: Ping1?
+T1: Ping3?
+R1: Analog T-bar value: 0413
+R1: Analog T-bar value: 0438
+R1: Analog T-bar value: 0472
+R1: Analog T-bar value: 0498
+R1: Analog T-bar value: 0529
+R1: Analog T-bar value: 0558
+R1: Analog T-bar value: 0589
+R1: Analog T-bar value: 0617
+R1: Analog T-bar value: 0645
+R1: Analog T-bar value: 0669
+R1: Analog T-bar value: 0697
+R1: Analog T-bar value: 0723
+R1: Analog T-bar value: 0753
+R1: Analog T-bar value: 0781
+R1: Analog T-bar value: 0811
+R1: Analog T-bar value: 0840
+R1: Analog T-bar value: 0871
+R1: Analog T-bar value: 0903
+R1: Analog T-bar value: 0940
+R1: Analog T-bar value: 0968
+R1: Analog T-bar value: 1001
+R1: Analog T-bar value: 1020
+R1: Analog T-bar value: 1023
+T1: Lamp PGM 8 88 00
+T1: Lamp PST 2 82 00
+T1: Crosspoint button: 69 02 00
+T1: Crosspoint button: 6a 01 00
+T1: Button PGM 8
+T1: Button PST 2
+T1: 86 28 02 00
+T2: Ping2?
+R2: Ping1?
+R1: Button PGM 3
+R1: Button PST 2
+R1: 86 28 02 00
+T1: Lamp PGM 3 83 00
+R1: Ping1?
+T1: Ping3?
+R1: Button PGM 5
+R1: Button PST 2
+R1: 86 28 02 00
+T1: Lamp PGM 5 85 00
+R1: Analog T-bar value: 1013
+R1: Analog T-bar value: 0985
+R1: Analog T-bar value: 0959
+T1: Crosspoint lamp: 65 c2 00
+T2: Ping2?
+R2: Ping1?
+R1: Analog T-bar value: 0935
+R1: Analog T-bar value: 0903
+R1: Analog T-bar value: 0875
+R1: Analog T-bar value: 0850
+R1: Analog T-bar value: 0822
+R1: Analog T-bar value: 0792
+R1: Analog T-bar value: 0759
+R1: Analog T-bar value: 0722
+R1: Analog T-bar value: 0685
+R1: Analog T-bar value: 0643
+R1: Analog T-bar value: 0600
+R1: Analog T-bar value: 0559
+R1: Analog T-bar value: 0519
+R1: Analog T-bar value: 0483
+R1: Analog T-bar value: 0436
+R1: Analog T-bar value: 0392
+R1: Analog T-bar value: 0347
+R1: Analog T-bar value: 0298
+R1: Analog T-bar value: 0252
+R1: Analog T-bar value: 0207
+R1: Analog T-bar value: 0166
+R1: Analog T-bar value: 0122
+R1: Analog T-bar value: 0071
+R1: Analog T-bar value: 0022
+R1: Analog T-bar value: 0003
+R1: Analog T-bar value: 0000
+T1: Crosspoint lamp: 64 02 00
+T1: Crosspoint lamp: 65 05 00
+T1: Crosspoint button: 69 01 00
+T1: Crosspoint button: 6a 00 00
+T1: PST button ACK
+R1: Ping1?
+T1: Ping3?
+R1: Analog Clip value: 0024
+R2: Ping1?
+T2: Ping2?
+R1: Analog Clip value: 0060
+R1: Analog Clip value: 0109
+R1: Analog Clip value: 0174
+R1: Analog Clip value: 0250
+R1: Analog Clip value: 0334
+R1: Analog Clip value: 0420
+R1: Analog Clip value: 0518
+R1: Analog Clip value: 0654
+R1: Analog Clip value: 1003
+R1: Analog Clip value: 1021
+R1: Analog Clip value: 1023
+R1: Analog Clip value: 1023
+R1: Ping1?
+T1: Ping3?
+R2: Ping1?
+T2: Ping2?
+R1: PST button ACK
+T1: Crosspoint lamp: 65 07 00
+R1: PST button ACK
+T1: Crosspoint lamp: 65 03 00
+R1: Ping1?
+T1: Ping3?
+R2: Ping1?
+T2: Ping2?
+R1: PST button ACK
+T1: Crosspoint lamp: 65 08 00
+R1: Ping1?
+T1: Ping3?
+R1: PST button ACK
+T1: Crosspoint lamp: 65 03 00
+R2: Ping1?
+T2: Ping2?
+R1: Ping1?
+T1: Ping3?
+R2: Ping1?
+T2: Ping2?

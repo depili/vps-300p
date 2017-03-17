@@ -1,0 +1,77 @@
+T1: f4 f6 1f 00 
+R1: f4 fe fe 00 
+R2: f4 fe fe 00 
+T2: f4 fe 3e 
+T2: 00 
+R1: f4 fe fe 
+R1: 00 
+T1: f4 f6 1f 
+T1: 00 
+T2: f4 fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 
+T2: fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 
+T2: fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 
+T2: fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+R2: f4 fe 
+R2: fe 00 
+T2: f4 fe 3e 
+T2: 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 fe 
+T2: 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
+T1: f4 f6 1f 
+T1: 00 
+R1: f4 fe fe 00 
+T2: f4 fe 3e 
+T2: 00 
+R2: f4 fe fe 00 
