@@ -5,6 +5,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
 	"github.com/tarm/serial"
+	"os"
 	"time"
 )
 
@@ -22,23 +23,59 @@ func main() {
 		panic(err)
 	}
 
-	s1Color := color.FgYellow
-	s2Color := color.FgRed
-	s3Color := color.FgBlue
-	s4Color := color.FgGreen
+	s1Color := color.New(color.FgYellow)
+	s2Color := color.New(color.FgRed)
+	s3Color := color.New(color.FgBlue)
+	s4Color := color.New(color.FgGreen)
 
-	go serialListen(Options.Serial1, "T1", s1Color)
-	go serialListen(Options.Serial2, "T2", s2Color)
-	go serialListen(Options.Serial3, "R1", s3Color)
-	go serialListen(Options.Serial4, "R2", s4Color)
+	s1Chan := make(chan string)
+	s2Chan := make(chan string)
+	s3Chan := make(chan string)
+	s4Chan := make(chan string)
+
+	go serialListen(Options.Serial1, s1Chan)
+	go serialListen(Options.Serial2, s2Chan)
+	go serialListen(Options.Serial3, s3Chan)
+	go serialListen(Options.Serial4, s4Chan)
+
+	filename := fmt.Sprintf("%s.txt", time.Now().Format("2006-01-02T15:04:05"))
+	fmt.Printf("Writing log to file: %s\n", filename)
+	f, err := os.Create(filename)
+	check(err)
 
 	for {
-		// wait
-		time.Sleep(1 * time.Second)
+		select {
+		case s := <-s1Chan:
+			msg := fmt.Sprintf("T1 => %s\n", s)
+			_, err := f.WriteString(msg)
+			check(err)
+			s1Color.Printf("%s", msg)
+		case s := <-s2Chan:
+			msg := fmt.Sprintf("T2 => %s\n", s)
+			_, err := f.WriteString(msg)
+			check(err)
+			s2Color.Printf("%s", msg)
+		case s := <-s3Chan:
+			msg := fmt.Sprintf("R1 <= %s\n", s)
+			_, err := f.WriteString(msg)
+			check(err)
+			s3Color.Printf("%s", msg)
+		case s := <-s4Chan:
+			msg := fmt.Sprintf("R2 <= %s\n", s)
+			_, err := f.WriteString(msg)
+			check(err)
+			s4Color.Printf("%s", msg)
+		}
 	}
 }
 
-func serialListen(port, name string, c color.Attribute) {
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func serialListen(port string, c chan string) {
 	serialConfig := serial.Config{
 		Name:        port,
 		Baud:        38400,
@@ -57,29 +94,30 @@ func serialListen(port, name string, c color.Attribute) {
 	msg := make([]byte, 4)
 	msg_field := 0
 
+	serial.Flush()
+
 	for {
 		n, err := serial.Read(buf)
 		if err == nil {
-			color.Set(c)
 			for i := 0; i < n; i++ {
 				msg[msg_field] = buf[i]
 				msg_field = (msg_field + 1) % 4
 				if msg_field == 0 {
+					decode := ""
 					switch msg[0] {
 					case 0x84:
 						// Analog stuff?
 						switch msg[1] {
 						case 0x01:
-							analog(name, "Hue", msg)
+							decode = analog("Hue", msg)
 						case 0x3:
-							analog(name, "Gain", msg)
+							decode = analog("Gain", msg)
 						case 0x08:
-							analog(name, "Clip", msg)
+							decode = analog("Clip", msg)
 						case 0x4D:
-							// T-bar
-							analog(name, "T-bar", msg)
+							decode = analog("T-bar", msg)
 						default:
-							analog(name, fmt.Sprintf("UNKNOWN %02x", msg[1]), msg)
+							decode = analog(fmt.Sprintf("UNKNOWN %02x", msg[1]), msg)
 						}
 					case 0x86:
 						// Crosspoint stuff
@@ -93,21 +131,22 @@ func serialListen(port, name string, c color.Attribute) {
 							}
 							switch msg[2] {
 							case 0x80:
-								button(name, fmt.Sprintf("%s Black", row))
+								decode = button(fmt.Sprintf("%s Black", row))
 							case 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88:
-								button(name, fmt.Sprintf("%s %d", row, msg[2]-0x80))
+								decode = button(fmt.Sprintf("%s %d", row, msg[2]-0x80))
 							case 0x89:
-								button(name, fmt.Sprintf("%s BKGD", row))
+								decode = button(fmt.Sprintf("%s BKGD", row))
+							default:
+								decode = button(fmt.Sprintf("%s UNKNOWN", row))
 							}
 						case 0x28:
 							if msg[2] == 0 && msg[3] == 0 {
-								fmt.Printf("%s: PGM button ACK\n", name)
+								decode = "PGM button ACK"
 							} else if msg[2] == 0x01 && msg[3] == 0 {
-								fmt.Printf("%s: PST button ACK\n", name)
+								decode = "PST button ACK"
 							} else {
-								unknown_msg(name, msg)
+								decode = "UNKNOWN ACK?"
 							}
-
 						case 0x64, 0x65:
 							// Upper row = 0x64, lower = 0x65
 							var row string
@@ -118,108 +157,68 @@ func serialListen(port, name string, c color.Attribute) {
 							}
 							switch msg[2] {
 							case 0x80:
-								lamp(name, fmt.Sprintf("%s Black", row), msg)
+								decode = lamp(fmt.Sprintf("%s Black", row))
 							case 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88:
-								lamp(name, fmt.Sprintf("%s %d", row, msg[2]-0x80), msg)
+								decode = lamp(fmt.Sprintf("%s %d", row, msg[2]-0x80))
 							case 0x89:
-								lamp(name, fmt.Sprintf("%s BKGD", row), msg)
+								decode = lamp(fmt.Sprintf("%s BKGD", row))
+							case 0xC0:
+								decode = lamp(fmt.Sprintf("%s Bright Black", row))
+							case 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8:
+								decode = lamp(fmt.Sprintf("%s Bright %d", row, msg[2]-0xC0))
+							case 0xC9:
+								decode = lamp(fmt.Sprintf("%s BKGD", row))
 							default:
-								fmt.Printf("%s: Crosspoint lamp: %02x %02x %02x\n", name, msg[1], msg[2], msg[3])
+								decode = fmt.Sprintf("UNKNOWN %s Lamp?", row)
+							}
+						case 0x6A:
+							// T-bar leds?
+							decode = "T-bar led?"
+							switch msg[2] {
+							case 0x00:
+								decode = "T-bar upwards arrow"
+							case 0x01:
+								decode = "T-bar downwards arrow"
 							}
 						default:
-							fmt.Printf("%s: Crosspoint button: %02x %02x %02x\n", name, msg[1], msg[2], msg[3])
+							decode = "UNKNOWN Crospoint?"
 						}
 					case 0xE0:
+						decode = "Ping?"
 						if msg[1] == 00 && msg[2] == 00 {
 							switch msg[3] {
 							case 0x00:
-								fmt.Printf("%s: Ping1?\n", name)
+								decode = "Ping1"
 							case 0xf0:
-								fmt.Printf("%s: Ping2?\n", name)
+								decode = "Ping2"
 							default:
-								unknown_msg(name, msg)
+								decode = "UNKNOWN Ping?"
 							}
 						} else if msg[1] == 0 && msg[2] == 0x02 && msg[3] == 0xF0 {
-							fmt.Printf("%s: Ping3?\n", name)
+							decode = "Ping3"
 						} else {
-							unknown_msg(name, msg)
+							decode = "UNKNOWN Ping?"
 						}
-					default:
-						unknown_msg(name, msg)
 					}
+					c <- fmt.Sprintf("%02X %02X %02X %02X %s", msg[0], msg[1], msg[2], msg[3], decode)
 				}
 			}
-			color.Unset()
 		}
 	}
 }
 
-func unknown_msg(name string, msg []byte) {
-	fmt.Printf("%s: %02x %02x %02x %02x\n", name, msg[0], msg[1], msg[2], msg[3])
-}
-
-func analog(name, control string, msg []byte) {
+// Decode a analog value message
+func analog(control string, msg []byte) string {
 	value := int(msg[3])*256 + int(msg[2])
-	fmt.Printf("%s: Analog %s value: %04d\n", name, control, value)
+	return fmt.Sprintf("Analog %s value: %04d", control, value)
 }
 
-func button(name, button string) {
-	fmt.Printf("%s: Button %s\n", name, button)
+// Button messages
+func button(button string) string {
+	return fmt.Sprintf("Button %s", button)
 }
 
-func lamp(name, lamp string, msg []byte) {
-	fmt.Printf("%s: Lamp %s %02x %02x\n", name, lamp, msg[2], msg[3])
-}
-
-func decode_command(b byte) {
-	switch b {
-	case 0x41, 0x42, 0x43, 0x44:
-		fmt.Printf("READ crosspoint")
-	case 0xc1, 0xc2, 0xc3, 0xc4:
-		fmt.Printf("WRITE crosspoint")
-	case 0x45:
-		fmt.Printf("READ analog control")
-	case 0xc5:
-		fmt.Printf("WRITE analog control")
-	case 0x46, 0x47:
-		fmt.Printf("READ panel/lamp control")
-	case 0xc6, 0xc7:
-		fmt.Printf("WRITE panel/lamp control")
-	case 0x48:
-		fmt.Printf("READ wipe pattern")
-	case 0xc8:
-		fmt.Printf("WRITE wipe pattern")
-	case 0x4a:
-		fmt.Printf("READ transition mode")
-	case 0xca:
-		fmt.Printf("WRITE transition mode")
-	case 0x4c, 0x4d, 0x7d:
-		fmt.Printf("READ transition rate")
-	case 0xcc, 0xcd, 0xfd:
-		fmt.Printf("WRITE transition rate")
-	case 0xda:
-		fmt.Printf("WRITE effect memory store")
-	case 0xdb:
-		fmt.Printf("WRITE effect memory recall")
-	case 0x6d:
-		fmt.Printf("READ field mode")
-	case 0xed:
-		fmt.Printf("WRITE field mode")
-	case 0xee:
-		fmt.Printf("WRITE status update")
-	case 0xf2:
-		fmt.Printf("WRITE all stop")
-	case 0x78:
-		fmt.Printf("READ lamp status map")
-	case 0xf8:
-		fmt.Printf("WRITE lamp status map")
-	case 0xfb:
-		fmt.Printf("WRITE panel key select")
-	case 0x7e:
-		fmt.Printf("READ effect memory transfer")
-	case 0xfe:
-		fmt.Printf("WRITE effect memory transfer")
-	default:
-		fmt.Printf("UNKNOWN: %02x", b)
-	}
+// Lamp messages
+func lamp(lamp string) string {
+	return fmt.Sprintf("Lamp %s\n", lamp)
 }
