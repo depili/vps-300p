@@ -120,7 +120,7 @@ func serialListen(port string, c chan string) {
 							decode = analog(fmt.Sprintf("UNKNOWN %02x", msg[1]), msg)
 						}
 					case 0x86:
-						// Crosspoint stuff
+						// Buttons and lamps?
 						switch msg[1] {
 						case 0x01, 0x02:
 							var row string
@@ -138,6 +138,47 @@ func serialListen(port string, c chan string) {
 								decode = button(fmt.Sprintf("%s BKGD", row))
 							default:
 								decode = button(fmt.Sprintf("%s UNKNOWN", row))
+							}
+						case 0x1A:
+							// Key source
+							decode = "Key source UNKNOWN"
+							switch msg[2] {
+							case 0x00:
+								decode = "Key source 1"
+							case 0x01:
+								decode = "Key source 2"
+							case 0x02:
+								decode = "Key source LUM"
+							case 0x03:
+								// Speculation
+								decode = "Key source chroma key?"
+							}
+						case 0x1B:
+							// Keyer toggles?
+							decode = "Keyer stuff?"
+							switch msg[2] {
+							case 0x00:
+								decode = "Keyer video1 toggle"
+							case 0x01:
+								decode = "Keyer video2 toggle"
+							case 0x04:
+								decode = "Keyer matt toggle"
+							}
+						case 0x1C:
+							decode = toggle("Keyer key invert", msg)
+						case 0x1D:
+							decode = toggle("Keyer mask", msg)
+						case 0x1E:
+							decode = toggle("Keyer mask invert", msg)
+						case 0x1F:
+							// Keyer edge toggle
+							switch msg[2] {
+							case 0x00:
+								decode = "Keyer edge & shadow toggle off"
+							case 0x01:
+								decode = "Keyer edge toggle on"
+							case 0x02:
+								decode = "Keyer shadow toggle on"
 							}
 						case 0x28:
 							if msg[2] == 0 && msg[3] == 0 {
@@ -181,7 +222,7 @@ func serialListen(port string, c chan string) {
 								decode = "T-bar downwards arrow"
 							}
 						default:
-							decode = "UNKNOWN Crospoint?"
+							decode = "UNKNOWN button or lamp?"
 						}
 					case 0xE0:
 						decode = "Ping?"
@@ -204,6 +245,17 @@ func serialListen(port string, c chan string) {
 				}
 			}
 		}
+	}
+}
+
+func toggle(name string, msg []byte) string {
+	switch msg[2] {
+	case 0x00:
+		return fmt.Sprintf("%s toggle off", name)
+	case 0x01:
+		return fmt.Sprintf("%s toggle on", name)
+	default:
+		return fmt.Sprintf("%s toggle UNKNOWN STATE", name)
 	}
 }
 
