@@ -220,5 +220,5 @@ func button(button string) string {
 
 // Lamp messages
 func lamp(lamp string) string {
-	return fmt.Sprintf("Lamp %s\n", lamp)
+	return fmt.Sprintf("Lamp %s", lamp)
 }
