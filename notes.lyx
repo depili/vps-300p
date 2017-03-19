@@ -764,7 +764,7 @@ With only the mixer on there is no traffic on any serial lines.
  The third differential rx/tx pair seems to be unused in this configuration...
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Protocol
 \end_layout
 
@@ -773,48 +773,180 @@ Messages seem to be of 4 byte lenght, with the first byte denoting the message
  type.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Byte 1
 \end_layout
 
-\begin_layout Paragraph
+\begin_layout Subsubsection
 0x84 Analog control
 \end_layout
 
 \begin_layout Standard
-Byte 2:
-\end_layout
-
-\begin_layout Description
-0x01 Hue
-\end_layout
-
-\begin_layout Description
-0x03 Gain
-\end_layout
-
-\begin_layout Description
-0x08 Clip
-\end_layout
-
-\begin_layout Description
-0x2e joystick?
-\end_layout
-
-\begin_layout Description
-0x2d joystick?
-\end_layout
-
-\begin_layout Description
-0x4D T-bar, 
+The value is encoded with 
 \begin_inset Formula $value=byte4*256+byte3$
 \end_inset
 
-
+.
+ Byte2 chooses what value this is:
 \end_layout
 
-\begin_layout Paragraph
-0x86 Crosspoint stuff
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x01 Hue
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x03 Gain
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x08 Clip
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x0E Key2 shadow pos x
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x0F Key2 shadow pos y
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x11 Key2 transp
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x1A Mask2 top
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x1B Mask2 bottom
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x1C Mask2 right
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x1D Mask2 left
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x21 Key2 matt hue
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x22 Key2 matt sat
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x23 Key2 matt lum
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x27 Key2 edge hue
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x28 Key2 edge sat
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x29 Key2 edge lum
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x2A BKGD hue
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x2B BKGD sat
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x2C BKGD lum
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x2D Wipe pos X (signed value)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x2E Wipe pos Y (signed value)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x31 Wipe edge soft/width
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x32 Wipe border width
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x37 Wipe border hue
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x38 Wipe border sat
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x39 Wipe border hue
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x3A Wipe free speed
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x41 Paint Y
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x42 Paint C
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x43 Mosaic
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0c4D T-bar
+\end_layout
+
+\begin_layout Subsubsection
+0x86 Buttons, toggles, lamps
 \end_layout
 
 \begin_layout Standard
@@ -829,7 +961,7 @@ Byte 2:
 0x65 PST row lamps: 0xC0-0xC9 (3d effect unknown)
 \end_layout
 
-\begin_layout Paragraph
+\begin_layout Subsubsection
 0xE0 Pings
 \end_layout
 
