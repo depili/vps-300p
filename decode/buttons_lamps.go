@@ -17,11 +17,13 @@ func decode_button_lamp(msg []byte) string {
 			row = "PST"
 		}
 		switch msg[2] {
-		case 0x80:
+		case 0x00, 0x80:
 			decode = button(fmt.Sprintf("%s Black", row))
+		case 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08:
+			fallthrough
 		case 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88:
-			decode = button(fmt.Sprintf("%s %d", row, msg[2]-0x80))
-		case 0x89:
+			decode = button(fmt.Sprintf("%s %d", row, msg[2]&0x0F))
+		case 0x09, 0x89:
 			decode = button(fmt.Sprintf("%s BKGD", row))
 		default:
 			decode = button(fmt.Sprintf("%s UNKNOWN", row))
@@ -137,6 +139,10 @@ func decode_button_lamp(msg []byte) string {
 			mode = "block 3"
 		}
 		decode = fmt.Sprintf("Wipe2 edge %s", mode)
+	case 0x33:
+		if msg[2] == 0x01 {
+			decode = button("CUT")
+		}
 	case 0x36:
 		decode = analog("BKGD mode", msg)
 	case 0x37:
@@ -183,31 +189,58 @@ func decode_button_lamp(msg []byte) string {
 			row = "PST"
 		}
 		switch msg[2] {
-		case 0x40:
-			decode = lamp(fmt.Sprintf("%s bright Black", row))
-		case 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48:
-			decode = lamp(fmt.Sprintf("%s bright %d", row, msg[2]-0x40))
-		case 0x49:
-			decode = lamp(fmt.Sprintf("%s bright BKGD", row))
-		case 0x80:
+		case 0x00, 0x60, 0x80:
 			decode = lamp(fmt.Sprintf("%s Black", row))
+		case 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08:
+			fallthrough
+		case 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68:
+			fallthrough
 		case 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88:
-			decode = lamp(fmt.Sprintf("%s %d", row, msg[2]-0x80))
-		case 0x89:
+			decode = lamp(fmt.Sprintf("%s %d", row, msg[2]&0x0F))
+		case 0x09, 0x69, 0x89:
 			decode = lamp(fmt.Sprintf("%s BKGD", row))
-		case 0xC0:
-			decode = lamp(fmt.Sprintf("%s Bright Black", row))
+		case 0x40:
+			decode = lamp("PST bright Black")
+		case 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48:
+			fallthrough
 		case 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8:
-			decode = lamp(fmt.Sprintf("%s Bright %d", row, msg[2]-0xC0))
-		case 0xC9:
-			decode = lamp(fmt.Sprintf("%s BKGD", row))
+			decode = lamp(fmt.Sprintf("PST bright %d", msg[2]&0x0F))
+		case 0x49:
+			decode = lamp("PST bright BKGD")
 		default:
 			decode = fmt.Sprintf("UNKNOWN %s Lamp?", row)
 		}
 	case 0x67:
 		decode = toggle("Key2 led", msg)
 	case 0x68:
-		decode = "Transition lamps, TODO: decode bitmap"
+		decode = "Transition lamps: "
+		if msg[2]&0x01 != 0 {
+			decode = fmt.Sprintf("%s <low black trans>", decode)
+		}
+		if msg[2]&0x02 != 0 {
+			decode = fmt.Sprintf("%s <bright black trans>", decode)
+		}
+		if msg[2]&0x04 != 0 {
+			decode = fmt.Sprintf("%s <low DSK trans>", decode)
+		}
+		if msg[2]&0x08 != 0 {
+			decode = fmt.Sprintf("%s <bright DSK trans>", decode)
+		}
+		if msg[2]&0x10 != 0 {
+			decode = fmt.Sprintf("%s <low PGM trans>", decode)
+		}
+		if msg[2]&0x20 != 0 {
+			decode = fmt.Sprintf("%s <bright PGM trans>", decode)
+		}
+	case 0x69:
+		switch msg[2] {
+		case 0x00:
+			decode = lamp("PGM and PST 3D effect off")
+		case 0x01:
+			decode = lamp("PGM 3D effect")
+		case 0x02:
+			decode = lamp("PST 3D effect")
+		}
 	case 0x6A:
 		// T-bar leds?
 		decode = "T-bar led?"
