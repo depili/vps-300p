@@ -758,10 +758,30 @@ Traffic
 \end_layout
 
 \begin_layout Standard
+We shall denote by R1 the outgoing data from IC18 and with T1 the incoming
+ data on the same chip.
+ R2 and T2 refer to IC12 and R3 and T3 to IC2 in the same fashion.
+\end_layout
+
+\begin_layout Standard
 With only the mixer on there is no traffic on any serial lines.
  With the mixer only it sends some data to R1 and R2 channles.
  When both are on there is data on R1, R2, T1 and T2 channels.
  The third differential rx/tx pair seems to be unused in this configuration...
+\end_layout
+
+\begin_layout Standard
+The initialization happens when the controller sees a reply to it's 
+\begin_inset Quotes eld
+\end_inset
+
+ping
+\begin_inset Quotes erd
+\end_inset
+
+ packets on the serial lines.
+ Then the controller first sends some unknown traffic, presumed to be its
+ configuration, followed by the mixer sending its configuration and state.
 \end_layout
 
 \begin_layout Section
@@ -769,12 +789,19 @@ Protocol
 \end_layout
 
 \begin_layout Standard
-Messages seem to be of 4 byte lenght, with the first byte denoting the message
- type.
+Messages seem to be of 4 byte length, 32 bits.
 \end_layout
 
 \begin_layout Subsection
 Byte 1
+\end_layout
+
+\begin_layout Standard
+The first byte seems to designate the message type.
+\end_layout
+
+\begin_layout Subsubsection
+0x80 Configuration?
 \end_layout
 
 \begin_layout Subsubsection
@@ -782,12 +809,9 @@ Byte 1
 \end_layout
 
 \begin_layout Standard
-The value is encoded with 
-\begin_inset Formula $value=byte4*256+byte3$
-\end_inset
-
-.
- Byte2 chooses what value this is:
+The value is encoded in the last two bytes, where the first byte contains
+ LSB.
+ The data should be read as a signed 16 bit integer.
 \end_layout
 
 \begin_layout Labeling
@@ -797,12 +821,42 @@ The value is encoded with
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
+0x02 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
 0x03 Gain
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
+0x04
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x07
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
 0x08 Clip
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x09
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x10
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x0D
 \end_layout
 
 \begin_layout Labeling
@@ -817,7 +871,22 @@ The value is encoded with
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
+0x10
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
 0x11 Key2 transp
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x13
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x14
 \end_layout
 
 \begin_layout Labeling
@@ -945,6 +1014,216 @@ The value is encoded with
 0c4D T-bar
 \end_layout
 
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x50
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x51
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x52
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x53
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x54
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x55
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x56
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x57
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x58
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x59
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x5A
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x5B
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x5C
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x5D
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x5E
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x5F
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x60
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x61
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x62
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x63
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x64
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x65
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x66
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x67
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x68
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x69
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x6A
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x6B
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x6C
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x6D
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x6E
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x6F
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x70
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x71
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x72
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x73
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x74
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x75
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x76
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x77
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x78
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+0x79
+\end_layout
+
 \begin_layout Subsubsection
 0x86 Buttons, toggles, lamps
 \end_layout
@@ -963,6 +1242,15 @@ Byte 2:
 
 \begin_layout Subsubsection
 0xE0 Pings
+\end_layout
+
+\begin_layout Subsubsection
+0xE1 configuration, boot states?
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+E100FF7F End of initialization?
 \end_layout
 
 \end_body
