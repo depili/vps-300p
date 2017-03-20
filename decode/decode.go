@@ -44,12 +44,6 @@ func toggle(name string, msg []byte) string {
 	}
 }
 
-// Decode a analog value message
-func analog(control string, msg []byte) string {
-	value := int(msg[3])*256 + int(msg[2])
-	return fmt.Sprintf("Analog %s value: %04d", control, value)
-}
-
 // Button messages
 func button(button string) string {
 	return fmt.Sprintf("Button %s", button)

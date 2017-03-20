@@ -1,6 +1,7 @@
 package decode
 
 import (
+	"encoding/binary"
 	"fmt"
 )
 
@@ -72,4 +73,10 @@ func decode_analog(msg []byte) string {
 		name = "T-bar"
 	}
 	return analog(name, msg)
+}
+
+// Decode a analog value message
+func analog(control string, msg []byte) string {
+	value := int16(binary.LittleEndian.Uint16(msg[2:]))
+	return fmt.Sprintf("Analog %s value: %04d", control, value)
 }
