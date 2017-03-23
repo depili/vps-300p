@@ -33,9 +33,6 @@ func main() {
 	T1Chan := make(chan []byte, 20)
 	T2Chan := make(chan []byte, 20)
 
-	needs_init1 := true
-	needs_init2 := true
-
 	go serialWorker(Options.Serial1, R1Chan, T1Chan)
 	go serialWorker(Options.Serial2, R2Chan, T2Chan)
 
@@ -44,33 +41,49 @@ func main() {
 	f, err := os.Create(filename)
 	check(err)
 
+	ticker := time.NewTicker(time.Second)
+	lamp := byte(0)
+	initialized := false
+
 	for {
 		select {
+		case <-ticker.C:
+			if initialized {
+				msg := []byte{0x86, 0x64, lamp, 0x00}
+				write_msg("T1 <=", msg, f, T1Color)
+				T1Chan <- msg
+				msg = []byte{0x86, 0x6A, lamp % 2, 0x00}
+				write_msg("T1 <=", msg, f, T1Color)
+				T1Chan <- msg
+				lamp = (lamp + 1) % 10
+			}
 		case s := <-R1Chan:
 			write_msg("R1 =>", s, f, R1Color)
 			if p, buf := ping_1(s); p == true {
 				T1Chan <- buf
 				write_msg("T1 <=", buf, f, T1Color)
-				if needs_init1 {
-					for _, buf := range static.T1_init_data() {
-						T1Chan <- buf
-						write_msg("T1 <=", buf, f, T1Color)
-					}
-					needs_init1 = false
+			}
+			if decode.MsgEq(s, []byte{0x86, 0x63, 0x01, 0x00}) {
+				// Initialization request
+
+				for _, buf := range static.T1_init_data() {
+					T1Chan <- buf
+					write_msg("T1 <=", buf, f, T1Color)
 				}
+				for _, buf := range static.T2_init_data() {
+					T2Chan <- buf
+					write_msg("T2 <=", buf, f, T2Color)
+				}
+				msg := []byte{0xE1, 0x00, 0xFF, 0x7F}
+				T1Chan <- msg
+				write_msg("T1 <=", msg, f, T1Color)
+				initialized = true
 			}
 		case s := <-R2Chan:
 			write_msg("R2 =>", s, f, R2Color)
 			if p, buf := ping_2(s); p == true {
 				T2Chan <- buf
 				write_msg("T2 <=", buf, f, T2Color)
-				if needs_init2 {
-					for _, buf := range static.T2_init_data() {
-						T2Chan <- buf
-						write_msg("T2 <=", buf, f, T2Color)
-					}
-					needs_init2 = false
-				}
 			}
 		}
 	}
@@ -127,25 +140,25 @@ func serialWorker(port string, r chan []byte, w chan []byte) {
 
 	serial.Flush()
 
+	go serialWriter(serial, w)
+
 	for {
-		select {
-		case buf := <-w:
-			_, err := serial.Write(buf)
-			if err != nil {
-				panic(err)
-			}
-		default:
-			n, err := serial.Read(buf)
-			if err == nil {
-				for i := 0; i < n; i++ {
-					msg[msg_field] = buf[i]
-					msg_field = (msg_field + 1) % 4
-					if msg_field == 0 {
-						r <- msg
-					}
+		n, err := serial.Read(buf)
+		if err == nil {
+			for i := 0; i < n; i++ {
+				msg[msg_field] = buf[i]
+				msg_field = (msg_field + 1) % 4
+				if msg_field == 0 {
+					r <- msg
 				}
 			}
 		}
+	}
+}
 
+func serialWriter(serial *serial.Port, w chan []byte) {
+	for buf := range w {
+		_, err := serial.Write(buf)
+		check(err)
 	}
 }
