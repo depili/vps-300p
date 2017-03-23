@@ -53,3 +53,21 @@ func button(button string) string {
 func lamp(lamp string) string {
 	return fmt.Sprintf("Lamp %s", lamp)
 }
+
+func MsgEq(a, b []byte) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
