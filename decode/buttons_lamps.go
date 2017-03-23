@@ -180,6 +180,10 @@ func decode_button_lamp(msg []byte) string {
 		case 0x01:
 			decode = "Wipe2 spin dir CW"
 		}
+	case 0x63:
+		if MsgEq(msg, []byte{0x86, 0x63, 0x01, 0x00}) {
+			decode = "Request initialization"
+		}
 	case 0x64, 0x65:
 		// Upper row = 0x64, lower = 0x65
 		var row string
