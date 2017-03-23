@@ -1,0 +1,14 @@
+R1 <= Ping1
+T1 <= Ping3
+R2 <= Ping1
+T2 <= Ping2
+R1 <= Ping1
+T1 <= Ping3
+R2 <= Ping1
+T2 <= Ping2
+R1 <= Ping1
+T1 <= Ping3
+R2 <= Ping1
+T2 <= Ping2
+R1 <= Ping1
+T1 <= Ping3
