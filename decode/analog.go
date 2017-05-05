@@ -1,12 +1,11 @@
 package decode
 
 import (
-	"encoding/binary"
 	"fmt"
 )
 
 // Messages with 0x84 as first byte are "analog" values
-func decode_analog(msg []byte) string {
+func decode_analog_84(msg []byte) string {
 	name := fmt.Sprintf("UNKNOWN %02X", msg[1])
 	switch msg[1] {
 	case 0x01:
@@ -77,6 +76,9 @@ func decode_analog(msg []byte) string {
 
 // Decode a analog value message
 func analog(control string, msg []byte) string {
-	value := int16(binary.LittleEndian.Uint16(msg[2:]))
+	value := int(msg[2]) + ((int(msg[3]) & 0x7F) * 256)
+	if msg[3]&0x80 > 0 {
+		value = -32767 + value
+	}
 	return fmt.Sprintf("Analog %s value: %04d", control, value)
 }
