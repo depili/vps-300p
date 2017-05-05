@@ -39,10 +39,13 @@ type mixer struct {
 
 func Init(serialConfig serial.Config) *mixer {
 	var mixer = mixer{
-		PGM:    0,
-		PST:    0,
-		rxChan: make(chan []byte),
-		TxChan: make(chan []byte),
+		PGM:        0,
+		PST:        0,
+		TransType:  TransWipe,
+		transDir:   true,
+		TransValue: 0,
+		rxChan:     make(chan []byte),
+		TxChan:     make(chan []byte),
 	}
 
 	go serial_worker.Init(serialConfig, mixer.rxChan, mixer.TxChan)
@@ -61,7 +64,28 @@ func (mixer *mixer) stateKeeper() {
 				switch msg[1] {
 				case 0x4D:
 					// T-bar
-					mixer.TransValue = analog(msg)
+					value := analog(msg)
+					if mixer.transDir {
+						if value == 1023 {
+							// Completed transition
+							mixer.transDir = false
+							mixer.TransValue = 1023 - value
+							mixer.cut()
+							mixer.TxChan <- []byte{0x86, 0x6A, 0x01, 0x00} // Upwards arrow
+						} else {
+							mixer.TransValue = value
+						}
+					} else {
+						if value == 0 {
+							// Completed transition
+							mixer.transDir = true
+							mixer.TransValue = value
+							mixer.cut()
+							mixer.TxChan <- []byte{0x86, 0x6A, 0x00, 0x00} // Downwards arrow
+						} else {
+							mixer.TransValue = 1023 - value
+						}
+					}
 				}
 			case 0x86:
 				switch msg[1] {
@@ -77,16 +101,10 @@ func (mixer *mixer) stateKeeper() {
 					}
 				case 0x28:
 					// Update lamps on the controller
-					mixer.TxChan <- []byte{0x86, 0x64, byte(mixer.PGM), 0x00}
-					mixer.TxChan <- []byte{0x86, 0x65, byte(mixer.PST), 0x00}
+					mixer.send_sources()
 				case 0x33:
 					// Cut button
-					p := mixer.PGM
-					mixer.PGM = mixer.PST
-					mixer.PST = p
-
-					mixer.TxChan <- []byte{0x86, 0x64, byte(mixer.PGM), 0x00}
-					mixer.TxChan <- []byte{0x86, 0x65, byte(mixer.PST), 0x00}
+					mixer.cut()
 				default:
 					fmt.Printf("**** UNKNOWN MESSAGE ****\n")
 				}
@@ -113,6 +131,18 @@ func (mixer *mixer) Print() {
 		trans_type = "Mix"
 	}
 	fmt.Printf("\tTransition type: %s\n", trans_type)
+}
+
+func (mixer *mixer) cut() {
+	p := mixer.PGM
+	mixer.PGM = mixer.PST
+	mixer.PST = p
+	mixer.send_sources()
+}
+
+func (mixer *mixer) send_sources() {
+	mixer.TxChan <- []byte{0x86, 0x64, byte(mixer.PGM), 0x00}
+	mixer.TxChan <- []byte{0x86, 0x65, byte(mixer.PST), 0x00}
 }
 
 func analog(msg []byte) int {

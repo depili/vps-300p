@@ -13,7 +13,6 @@ import (
 
 var Options struct {
 	Serial1 string `long:"serial1" description:"T1 & R1" default:"/dev/ttyUSB0"`
-	Serial2 string `long:"serial2" description:"T2 & R2" default:"/dev/ttyUSB0"`
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
@@ -24,24 +23,19 @@ func main() {
 	}
 
 	T1Color := color.New(color.FgYellow)
-	T2Color := color.New(color.FgRed)
 	R1Color := color.New(color.FgBlue)
-	R2Color := color.New(color.FgGreen)
 
-	R1Chan := make(chan []byte, 20)
-	R2Chan := make(chan []byte, 20)
-	T1Chan := make(chan []byte, 20)
-	T2Chan := make(chan []byte, 20)
+	R1Chan := make(chan []byte)
+	T1Chan := make(chan []byte)
 
 	go serialWorker(Options.Serial1, R1Chan, T1Chan)
-	go serialWorker(Options.Serial2, R2Chan, T2Chan)
 
 	filename := fmt.Sprintf("%s.txt", time.Now().Format("2006-01-02T15:04:05"))
 	fmt.Printf("Writing log to file: %s\n", filename)
 	f, err := os.Create(filename)
 	check(err)
 
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(1000 * time.Millisecond)
 	lamp := byte(0)
 	initialized := false
 
@@ -49,13 +43,8 @@ func main() {
 		select {
 		case <-ticker.C:
 			if initialized {
-				msg := []byte{0x86, 0x64, lamp, 0x00}
-				write_msg("T1 <=", msg, f, T1Color)
-				T1Chan <- msg
-				msg = []byte{0x86, 0x6A, lamp % 2, 0x00}
-				write_msg("T1 <=", msg, f, T1Color)
-				T1Chan <- msg
-				lamp = (lamp + 1) % 10
+				flashLeds(lamp, T1Chan, T1Color, f)
+				lamp++
 			}
 		case s := <-R1Chan:
 			write_msg("R1 =>", s, f, R1Color)
@@ -70,22 +59,81 @@ func main() {
 					T1Chan <- buf
 					write_msg("T1 <=", buf, f, T1Color)
 				}
-				for _, buf := range static.T2_init_data() {
-					T2Chan <- buf
-					write_msg("T2 <=", buf, f, T2Color)
-				}
 				msg := []byte{0xE1, 0x00, 0xFF, 0x7F}
 				T1Chan <- msg
 				write_msg("T1 <=", msg, f, T1Color)
 				initialized = true
 			}
-		case s := <-R2Chan:
-			write_msg("R2 =>", s, f, R2Color)
-			if p, buf := ping_2(s); p == true {
-				T2Chan <- buf
-				write_msg("T2 <=", buf, f, T2Color)
-			}
 		}
+	}
+}
+
+func flashLeds(lamp byte, T1Chan chan []byte, T1Color *color.Color, f *os.File) {
+	// PGM inputs
+	msg := []byte{0x86, 0x64, lamp % 10, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+	// T-bar up/down arrow
+	msg = []byte{0x86, 0x6A, lamp % 2, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+	// 3D effect toggle
+	msg = []byte{0x86, 0x69, lamp % 3, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+	// Key1 source
+	msg = []byte{0x86, 0x0C, lamp % 4, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+	// Key2 source
+	msg = []byte{0x86, 0x1A, lamp % 4, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+	// Key1 insert
+	msg = []byte{0x86, 0x11, lamp % 4, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+	msg = []byte{0x86, 0x0D, lamp % 5, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+	msg = []byte{0x86, 0x27, lamp % 2, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+
+	msg = []byte{0x86, 0x66, lamp % 2, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+
+	msg = []byte{0x86, 0x67, lamp % 2, 0x00}
+	write_msg("T1 <=", msg, f, T1Color)
+	T1Chan <- msg
+
+	if lamp&0x01 > 0 {
+		msg = []byte{0x86, 0x0E, 0x01, 0x00}
+		write_msg("T1 <=", msg, f, T1Color)
+		T1Chan <- msg
+	} else {
+		msg = []byte{0x86, 0x0E, 0x00, 0x00}
+		write_msg("T1 <=", msg, f, T1Color)
+		T1Chan <- msg
+	}
+	if lamp&0x02 > 0 {
+		msg = []byte{0x86, 0x0F, 0x01, 0x00}
+		write_msg("T1 <=", msg, f, T1Color)
+		T1Chan <- msg
+	} else {
+		msg = []byte{0x86, 0x0F, 0x00, 0x00}
+		write_msg("T1 <=", msg, f, T1Color)
+		T1Chan <- msg
+	}
+	if lamp&0x04 > 0 {
+		msg = []byte{0x86, 0x10, 0x01, 0x00}
+		write_msg("T1 <=", msg, f, T1Color)
+		T1Chan <- msg
+	} else {
+		msg = []byte{0x86, 0x10, 0x00, 0x00}
+		write_msg("T1 <=", msg, f, T1Color)
+		T1Chan <- msg
 	}
 }
 
@@ -99,7 +147,7 @@ func write_msg(line string, buf []byte, f *os.File, c *color.Color) {
 
 func ping_1(msg []byte) (bool, []byte) {
 	if msg[0] == 0xE0 && msg[1] == 0 && msg[2] == 0 && msg[3] == 0 {
-		return true, []byte{0xE0, 0x00, 0x02, 0xF0}
+		return true, []byte{0xE0, 0xFF, 0xFF, 0xF0}
 	} else {
 		return false, nil
 	}
@@ -107,7 +155,7 @@ func ping_1(msg []byte) (bool, []byte) {
 
 func ping_2(msg []byte) (bool, []byte) {
 	if msg[0] == 0xE0 && msg[1] == 0 && msg[2] == 0 && msg[3] == 0 {
-		return true, []byte{0xE0, 0x00, 0x00, 0xF0}
+		return true, []byte{0xE0, 0xFF, 0xFF, 0xF0}
 	} else {
 		return false, nil
 	}
@@ -122,8 +170,8 @@ func check(e error) {
 func serialWorker(port string, r chan []byte, w chan []byte) {
 	serialConfig := serial.Config{
 		Name:        port,
-		Baud:        38400,
-		Parity:      'O',
+		Baud:        115200,
+		Parity:      'N',
 		Size:        8,
 		StopBits:    1,
 		ReadTimeout: time.Millisecond,
