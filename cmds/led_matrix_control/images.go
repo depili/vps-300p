@@ -34,7 +34,7 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA) {
 		images.PST = <-pstChan
 		state := <-stateChan
 
-		alpha := image.NewUniform(color.RGBA{0, 0, 0, byte(state.Value / 4)})
+		alpha := image.NewUniform(color.RGBA{0, 0, 0, 255 - byte(state.Value/4)})
 		draw.Draw(images.Out, images.Out.Bounds(), images.PST, image.ZP, draw.Src)
 		draw.DrawMask(images.Out, images.Out.Bounds(), images.PGM, image.ZP, alpha, image.ZP, draw.Over)
 
