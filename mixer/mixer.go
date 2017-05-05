@@ -105,8 +105,6 @@ func (mixer *mixer) stateKeeper() {
 				case 0x33:
 					// Cut button
 					mixer.cut()
-				default:
-					fmt.Printf("**** UNKNOWN MESSAGE ****\n")
 				}
 			}
 			if decode.MsgEq(msg, []byte{0x86, 0x63, 0x01, 0x00}) {
