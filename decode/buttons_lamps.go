@@ -60,46 +60,94 @@ func decode_button_lamp(msg []byte) string {
 		case 0x02:
 			decode = "Key1 toggle on"
 		}
+	case 0x0C:
+		// Key source
+		decode = "Key1 source UNKNOWN"
+		switch msg[2] {
+		case 0x00:
+			decode = "Key1 source 1"
+		case 0x01:
+			decode = "Key1 source 2"
+		case 0x02:
+			decode = "Key1 source LUM"
+		case 0x03:
+			decode = "Key1 source chroma key?"
+		}
+	case 0x0D:
+		decode = "Keyer1 stuff?"
+		switch msg[2] {
+		case 0x00:
+			decode = "Keyer1 video1 toggle"
+		case 0x01:
+			decode = "Keyer1 video2 toggle"
+		case 0x02:
+			decode = "Keyer1 3D effect toggle"
+		case 0x03:
+			decode = "Keyer1 chroma key toggle"
+		case 0x04:
+			decode = "Keyer1 matt toggle"
+		}
+	case 0x0E:
+		decode = toggle("Keyer1 key invert", msg)
+	case 0x0F:
+		decode = toggle("Keyer1 mask", msg)
+	case 0x10:
+		decode = toggle("Keyer1 mask invert", msg)
+	case 0x11:
+		switch msg[2] {
+		case 0x00:
+			decode = "Keyer1 edge, shadow & outline toggle off"
+		case 0x01:
+			decode = "Keyer1 edge toggle on"
+		case 0x02:
+			decode = "Keyer1 shadow toggle on"
+		case 0x03:
+			decode = "Keyer1 outline toggle on"
+		}
 	case 0x1A:
 		// Key source
-		decode = "Key source UNKNOWN"
+		decode = "Key2 source UNKNOWN"
 		switch msg[2] {
 		case 0x00:
-			decode = "Key source 1"
+			decode = "Key2 source 1"
 		case 0x01:
-			decode = "Key source 2"
+			decode = "Key2 source 2"
 		case 0x02:
-			decode = "Key source LUM"
+			decode = "Key2 source LUM"
 		case 0x03:
-			// Speculation
-			decode = "Key source chroma key?"
+			decode = "Key2 source chroma key?"
 		}
 	case 0x1B:
-		// Keyer toggles?
-		decode = "Keyer stuff?"
+		decode = "Keyer2 stuff?"
 		switch msg[2] {
 		case 0x00:
-			decode = "Keyer video1 toggle"
+			decode = "Keyer2 video1 toggle"
 		case 0x01:
-			decode = "Keyer video2 toggle"
+			decode = "Keyer2 video2 toggle"
+		case 0x02:
+			decode = "Keyer2 3D effect toggle"
+		case 0x03:
+			decode = "Keyer2 chroma key toggle"
 		case 0x04:
-			decode = "Keyer matt toggle"
+			decode = "Keyer2 matt toggle"
 		}
 	case 0x1C:
-		decode = toggle("Keyer key invert", msg)
+		decode = toggle("Keyer2 key invert", msg)
 	case 0x1D:
-		decode = toggle("Keyer mask", msg)
+		decode = toggle("Keyer2 mask", msg)
 	case 0x1E:
-		decode = toggle("Keyer mask invert", msg)
+		decode = toggle("Keyer2 mask invert", msg)
 	case 0x1F:
 		// Keyer edge toggle
 		switch msg[2] {
 		case 0x00:
-			decode = "Keyer edge & shadow toggle off"
+			decode = "Keyer2 edge, shadow & outline toggle off"
 		case 0x01:
-			decode = "Keyer edge toggle on"
+			decode = "Keyer2 edge toggle on"
 		case 0x02:
-			decode = "Keyer shadow toggle on"
+			decode = "Keyer2 shadow toggle on"
+		case 0x03:
+			decode = "Keyer2 outline toggle on"
 		}
 	case 0x20:
 		switch msg[2] {
@@ -110,11 +158,18 @@ func decode_button_lamp(msg []byte) string {
 		case 0x02:
 			decode = "Key3 edge width 4H"
 		}
+	case 0x27:
+		switch msg[2] {
+		case 0x00:
+			decode = "Key priority: keyer1"
+		case 0x01:
+			decode = "Key priority: keyer2"
+		}
 	case 0x28:
 		if msg[2] == 0 && msg[3] == 0 {
-			decode = "PGM button ACK"
+			decode = "?PGM button ACK?"
 		} else if msg[2] == 0x01 && msg[3] == 0 {
-			decode = "PST button ACK"
+			decode = "?PST button ACK?"
 		} else {
 			decode = "UNKNOWN ACK?"
 		}
@@ -214,6 +269,8 @@ func decode_button_lamp(msg []byte) string {
 		default:
 			decode = fmt.Sprintf("UNKNOWN %s Lamp?", row)
 		}
+	case 0x66:
+		decode = toggle("Key1 led", msg)
 	case 0x67:
 		decode = toggle("Key2 led", msg)
 	case 0x68:
