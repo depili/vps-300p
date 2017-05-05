@@ -26,6 +26,9 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA) {
 	images.PST = image.NewNRGBA(image.Rect(0, 0, matrix_width, matrix_height))
 	draw.Draw(images.PST, images.PST.Bounds(), &image.Uniform{black}, image.ZP, draw.Src)
 
+	images.Out = image.NewNRGBA(image.Rect(0, 0, matrix_width, matrix_height))
+	draw.Draw(images.Out, images.Out.Bounds(), &image.Uniform{black}, image.ZP, draw.Src)
+
 	for {
 		select {
 		case img := <-pgmChan:
@@ -33,12 +36,15 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA) {
 		case img := <-pstChan:
 			images.PST = img
 		}
+		alpha := image.NewUniform(color.RGBA{0, 0, 0, eff_alpha})
+		draw.Draw(images.Out, images.Out.Bounds(), images.PST, image.ZP, draw.Src)
+		draw.DrawMask(images.Out, images.Out.Bounds(), images.PGM, image.ZP, alpha, image.ZP, draw.Over)
 
-		b := images.PGM.Bounds()
+		b := images.Out.Bounds()
 		for y := b.Min.Y; y < b.Max.Y; y++ {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				var c [3]byte
-				p := images.PGM.NRGBAAt(x, y)
+				p := images.Out.NRGBAAt(x, y)
 				c[0] = p.R
 				c[1] = p.G
 				c[2] = p.B

@@ -22,6 +22,7 @@ var Options struct {
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
+var eff_alpha uint8
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
@@ -75,6 +76,7 @@ func main() {
 		case <-ticker.C:
 			effChans[mixer.PGM] <- true
 			effChans[mixer.PST] <- false
+			eff_alpha = uint8(mixer.TransValue / 4)
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)

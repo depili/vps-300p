@@ -28,11 +28,13 @@ const (
 )
 
 type mixer struct {
-	PGM       byte // Active PGM selection
-	PST       byte // Active PST selection
-	rxChan    chan []byte
-	TxChan    chan []byte
-	TransType int
+	PGM        byte // Active PGM selection
+	PST        byte // Active PST selection
+	rxChan     chan []byte
+	TxChan     chan []byte
+	TransType  int
+	transDir   bool
+	TransValue int
 }
 
 func Init(serialConfig serial.Config) *mixer {
@@ -54,6 +56,13 @@ func (mixer *mixer) stateKeeper() {
 		select {
 		case msg := <-mixer.rxChan:
 			switch msg[0] {
+			case 0x84:
+				// Analog readings
+				switch msg[1] {
+				case 0x4D:
+					// T-bar
+					mixer.TransValue = analog(msg)
+				}
 			case 0x86:
 				switch msg[1] {
 				case 0x01:
@@ -104,4 +113,12 @@ func (mixer *mixer) Print() {
 		trans_type = "Mix"
 	}
 	fmt.Printf("\tTransition type: %s\n", trans_type)
+}
+
+func analog(msg []byte) int {
+	value := int(msg[2]) + ((int(msg[3]) & 0x7F) * 256)
+	if msg[3]&0x80 > 0 {
+		value = -32767 + value
+	}
+	return value
 }
