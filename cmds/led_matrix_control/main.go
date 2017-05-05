@@ -58,7 +58,7 @@ func main() {
 	// Start effect workers
 	go runBlack(effChans[0], pgmChan, pstChan)
 	go runPlasma(effChans[1], pgmChan, pstChan)
-	go runBlack(effChans[2], pgmChan, pstChan)
+	go runFlame(effChans[2], pgmChan, pstChan)
 	go runBlack(effChans[3], pgmChan, pstChan)
 	go runBlack(effChans[4], pgmChan, pstChan)
 	go runBlack(effChans[5], pgmChan, pstChan)

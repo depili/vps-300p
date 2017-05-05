@@ -8,7 +8,7 @@ import (
 )
 
 var plasma struct {
-	palette []color.NRGBA
+	palette []color.RGBA
 }
 
 func runPlasma(tick chan bool, pgmChan, pstChan chan *image.NRGBA) {
@@ -26,14 +26,10 @@ func runPlasma(tick chan bool, pgmChan, pstChan chan *image.NRGBA) {
 
 func generatePlasma(step int) *image.NRGBA {
 	if len(plasma.palette) != 360 {
-		plasma.palette = make([]color.NRGBA, 360)
+		plasma.palette = make([]color.RGBA, 360)
 		for i, _ := range plasma.palette {
-			var c color.NRGBA
 			r, g, b := hsluv.HsluvToRGB(float64(i), 100, 50)
-			c.R = byte(r * 255.0)
-			c.G = byte(g * 255.0)
-			c.B = byte(b * 255.0)
-			c.A = 255
+			c := color.RGBA{byte(r * 255.0), byte(g * 255.0), byte(b * 255.0), 255}
 			plasma.palette[i] = c
 		}
 	}
