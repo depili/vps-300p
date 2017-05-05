@@ -142,8 +142,13 @@ func (mixer *mixer) cut() {
 
 func (mixer *mixer) send_sources() {
 	state := mixer.State
+	pst := byte(state.PST)
+	if state.Value != 0 {
+		pst |= 0xC0
+	}
+
 	mixer.TxChan <- []byte{0x86, 0x64, byte(state.PGM), 0x00}
-	mixer.TxChan <- []byte{0x86, 0x65, byte(state.PST), 0x00}
+	mixer.TxChan <- []byte{0x86, 0x65, pst, 0x00}
 }
 
 func analog(msg []byte) int {
