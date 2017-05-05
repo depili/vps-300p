@@ -7,9 +7,11 @@ import (
 func Decode(msg []byte) string {
 	decode := ""
 	switch msg[0] {
+	case 0x80:
+		decode = analog(fmt.Sprintf("UNKNOWN 80 %02X", msg[1]), msg)
 	case 0x84:
 		// Analog stuff?
-		decode = decode_analog(msg)
+		decode = decode_analog_84(msg)
 	case 0x86:
 		// Buttons, toggles and lamps?
 		decode = decode_button_lamp(msg)
