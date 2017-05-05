@@ -27,17 +27,17 @@ func runFlame(tick chan bool, pgmChan, pstChan chan *image.NRGBA) {
 
 func initFlame() {
 	eff_flame.palette = make([]color.RGBA, 256)
-	eff_flame.buffer = make([][]byte, matrix_height)
+	eff_flame.buffer = make([][]byte, matrix_height+1)
 	for r, _ := range eff_flame.buffer {
 		eff_flame.buffer[r] = make([]byte, matrix_width)
 	}
 
 	for i, _ := range eff_flame.palette {
-		l := float64(i) / 256.0 * 100.0
-		if l > 50 {
-			l = 50
+		l := float64(i) / 256.0 * 110.0
+		if l > 70 {
+			l = 70
 		}
-		r, g, b := hsluv.HsluvToRGB(float64(i)/2.0, 100, l)
+		r, g, b := hsluv.HsluvToRGB(float64(i)/2.5, 100, l)
 		color := color.RGBA{byte(r * 255.0), byte(g * 255.0), byte(b * 255.0), 255}
 		eff_flame.palette[i] = color
 	}
@@ -45,16 +45,16 @@ func initFlame() {
 
 func flameSeed() {
 	// Seed the bottom row
-	for c, _ := range eff_flame.buffer[matrix_height-1] {
-		eff_flame.buffer[matrix_height-1][c] = byte(rand.Float32() * 255.0)
+	for c, _ := range eff_flame.buffer[matrix_height] {
+		eff_flame.buffer[matrix_height][c] = byte(rand.Float32()*200.0) + 55
 	}
 }
 
 func flameFill() *image.NRGBA {
-	for r, row := range eff_flame.buffer[0 : matrix_height-1] {
+	for r, row := range eff_flame.buffer[0:matrix_height] {
 		value := 0
 		for c, _ := range row {
-			if y := (r + 1); y < matrix_height {
+			if y := (r + 1); y < matrix_height+1 {
 				value = int(eff_flame.buffer[y][c])
 				if x := (c - 1); x >= 0 {
 					value += int(eff_flame.buffer[y][x])
@@ -63,7 +63,7 @@ func flameFill() *image.NRGBA {
 					value += int(eff_flame.buffer[y][x])
 				}
 			}
-			value *= 40
+			value *= 41
 			value /= 129
 			eff_flame.buffer[r][c] = byte(value)
 		}
