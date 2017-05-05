@@ -129,6 +129,7 @@ func (mixer *mixer) Print() {
 		trans_type = "Mix"
 	}
 	fmt.Printf("\tTransition type: %s\n", trans_type)
+	fmt.Printf("\tTransition value: %d\n", mixer.TransValue)
 }
 
 func (mixer *mixer) cut() {
