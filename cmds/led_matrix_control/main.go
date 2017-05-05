@@ -22,7 +22,7 @@ var Options struct {
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
-var eff_alpha uint8
+var stateChan chan *mixer.MixerState
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
@@ -37,6 +37,8 @@ func main() {
 		StopBits:    1,
 		ReadTimeout: time.Millisecond,
 	}
+
+	stateChan = make(chan *mixer.MixerState)
 
 	mixer := mixer.Init(serialConfig)
 	fmt.Printf("Mixer connection open.\n")
@@ -74,9 +76,10 @@ func main() {
 	for {
 		select {
 		case <-ticker.C:
-			effChans[mixer.PGM] <- true
-			effChans[mixer.PST] <- false
-			eff_alpha = uint8(mixer.TransValue / 4)
+			state := mixer.State
+			effChans[state.PGM] <- true
+			effChans[state.PST] <- false
+			stateChan <- state
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)

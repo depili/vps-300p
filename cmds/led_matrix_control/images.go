@@ -30,13 +30,11 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA) {
 	draw.Draw(images.Out, images.Out.Bounds(), &image.Uniform{black}, image.ZP, draw.Src)
 
 	for {
-		select {
-		case img := <-pgmChan:
-			images.PGM = img
-		case img := <-pstChan:
-			images.PST = img
-		}
-		alpha := image.NewUniform(color.RGBA{0, 0, 0, eff_alpha})
+		images.PGM = <-pgmChan
+		images.PST = <-pstChan
+		state := <-stateChan
+
+		alpha := image.NewUniform(color.RGBA{0, 0, 0, byte(state.Value / 4)})
 		draw.Draw(images.Out, images.Out.Bounds(), images.PST, image.ZP, draw.Src)
 		draw.DrawMask(images.Out, images.Out.Bounds(), images.PGM, image.ZP, alpha, image.ZP, draw.Over)
 

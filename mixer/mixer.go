@@ -28,24 +28,22 @@ const (
 )
 
 type mixer struct {
-	PGM        byte // Active PGM selection
-	PST        byte // Active PST selection
-	rxChan     chan []byte
-	TxChan     chan []byte
-	TransType  int
-	transDir   bool
-	TransValue int
+	rxChan chan []byte
+	TxChan chan []byte
+	State  *MixerState
 }
 
 func Init(serialConfig serial.Config) *mixer {
 	var mixer = mixer{
-		PGM:        0,
-		PST:        0,
-		TransType:  TransWipe,
-		transDir:   true,
-		TransValue: 0,
-		rxChan:     make(chan []byte),
-		TxChan:     make(chan []byte),
+		rxChan: make(chan []byte),
+		TxChan: make(chan []byte),
+	}
+	mixer.State = &MixerState{
+		PGM:   0,
+		PST:   0,
+		Type:  TransWipe,
+		Dir:   true,
+		Value: 0,
 	}
 
 	go serial_worker.Init(serialConfig, mixer.rxChan, mixer.TxChan)
@@ -65,39 +63,43 @@ func (mixer *mixer) stateKeeper() {
 				case 0x4D:
 					// T-bar
 					value := analog(msg)
-					if mixer.transDir {
+					if mixer.State.Dir {
 						if value == 1023 {
 							// Completed transition
-							mixer.transDir = false
-							mixer.TransValue = 1023 - value
-							mixer.cut()
+							s := mixer.State.copy()
+							s = s.cut()
+							s.Dir = false
+							s.Value = 0
 							mixer.TxChan <- []byte{0x86, 0x6A, 0x01, 0x00} // Upwards arrow
+							mixer.State = &s
 						} else {
-							mixer.TransValue = value
+							mixer.State.Value = value
 						}
 					} else {
 						if value == 0 {
-							// Completed transition
-							mixer.transDir = true
-							mixer.TransValue = value
-							mixer.cut()
+							s := mixer.State.copy()
+							s = s.cut()
+							s.Dir = true
+							s.Value = 0
 							mixer.TxChan <- []byte{0x86, 0x6A, 0x00, 0x00} // Downwards arrow
+							mixer.State = &s
 						} else {
-							mixer.TransValue = 1023 - value
+							mixer.State.Value = 1023 - value
 						}
 					}
+					mixer.send_sources()
 				}
 			case 0x86:
 				switch msg[1] {
 				case 0x01:
-					mixer.PGM = msg[2] & 0x0F
+					mixer.State.PGM = msg[2] & 0x0F
 				case 0x02:
-					mixer.PST = msg[2] & 0x0F
+					mixer.State.PST = msg[2] & 0x0F
 				case 0x04:
 					if msg[2] == 0x00 {
-						mixer.TransType = TransMix
+						mixer.State.Type = TransMix
 					} else {
-						mixer.TransType = TransWipe
+						mixer.State.Type = TransWipe
 					}
 				case 0x28:
 					// Update lamps on the controller
@@ -122,26 +124,26 @@ func (mixer *mixer) stateKeeper() {
 
 func (mixer *mixer) Print() {
 	fmt.Printf("Mixer state:\n")
-	fmt.Printf("\tPGM: %d\n", mixer.PGM)
-	fmt.Printf("\tPST: %d\n", mixer.PST)
+	fmt.Printf("\tPGM: %d\n", mixer.State.PGM)
+	fmt.Printf("\tPST: %d\n", mixer.State.PST)
 	trans_type := "Wipe"
-	if mixer.TransType == TransMix {
+	if mixer.State.Type == TransMix {
 		trans_type = "Mix"
 	}
 	fmt.Printf("\tTransition type: %s\n", trans_type)
-	fmt.Printf("\tTransition value: %d\n", mixer.TransValue)
+	fmt.Printf("\tTransition value: %d\n", mixer.State.Value)
 }
 
 func (mixer *mixer) cut() {
-	p := mixer.PGM
-	mixer.PGM = mixer.PST
-	mixer.PST = p
+	s := mixer.State.cut()
+	mixer.State = &s
 	mixer.send_sources()
 }
 
 func (mixer *mixer) send_sources() {
-	mixer.TxChan <- []byte{0x86, 0x64, byte(mixer.PGM), 0x00}
-	mixer.TxChan <- []byte{0x86, 0x65, byte(mixer.PST), 0x00}
+	state := mixer.State
+	mixer.TxChan <- []byte{0x86, 0x64, byte(state.PGM), 0x00}
+	mixer.TxChan <- []byte{0x86, 0x65, byte(state.PST), 0x00}
 }
 
 func analog(msg []byte) int {
