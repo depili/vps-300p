@@ -50,9 +50,10 @@ func main() {
 
 	pgmChan := make(chan *image.NRGBA, 1)
 	pstChan := make(chan *image.NRGBA, 1)
+	key1Chan := make(chan [][]bool, 1)
 
 	// Channels for requestin updates on various effects
-	var effChans [10]chan bool
+	var effChans [11]chan bool
 	for i := range effChans {
 		effChans[i] = make(chan bool)
 	}
@@ -69,7 +70,9 @@ func main() {
 	go runBlack(effChans[8], pgmChan, pstChan)
 	go runBlack(effChans[9], pgmChan, pstChan)
 
-	go imageWorker(pgmChan, pstChan)
+	go runText(effChans[10], key1Chan, key1Chan)
+
+	go imageWorker(pgmChan, pstChan, key1Chan)
 
 	ticker := time.NewTicker(time.Millisecond * time.Duration(Options.TickRate))
 
@@ -79,6 +82,7 @@ func main() {
 			state := mixer.State
 			effChans[state.PGM] <- true
 			effChans[state.PST] <- false
+			effChans[10] <- true
 			stateChan <- state
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully

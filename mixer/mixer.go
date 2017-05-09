@@ -27,6 +27,12 @@ const (
 	SourceBkgd  = iota
 )
 
+const (
+	LayerBKGD = 0x01
+	LayerKey1 = 0x04
+	LayerKey2 = 0x02
+)
+
 type mixer struct {
 	rxChan chan []byte
 	TxChan chan []byte
@@ -39,11 +45,12 @@ func Init(serialConfig serial.Config) *mixer {
 		TxChan: make(chan []byte),
 	}
 	mixer.State = &MixerState{
-		PGM:   0,
-		PST:   0,
-		Type:  TransWipe,
-		Dir:   true,
-		Value: 0,
+		PGM:    0,
+		PST:    0,
+		Type:   TransWipe,
+		Dir:    true,
+		Value:  0,
+		Layers: 0,
 	}
 
 	go serial_worker.Init(serialConfig, mixer.rxChan, mixer.TxChan)
@@ -66,10 +73,7 @@ func (mixer *mixer) stateKeeper() {
 					if mixer.State.Dir {
 						if value == 1023 {
 							// Completed transition
-							s := mixer.State.copy()
-							s = s.cut()
-							s.Dir = false
-							s.Value = 0
+							s := mixer.State.transComplete()
 							mixer.TxChan <- []byte{0x86, 0x6A, 0x01, 0x00} // Upwards arrow
 							mixer.State = &s
 						} else {
@@ -77,10 +81,7 @@ func (mixer *mixer) stateKeeper() {
 						}
 					} else {
 						if value == 0 {
-							s := mixer.State.copy()
-							s = s.cut()
-							s.Dir = true
-							s.Value = 0
+							s := mixer.State.transComplete()
 							mixer.TxChan <- []byte{0x86, 0x6A, 0x00, 0x00} // Downwards arrow
 							mixer.State = &s
 						} else {
@@ -101,6 +102,9 @@ func (mixer *mixer) stateKeeper() {
 					} else {
 						mixer.State.Type = TransWipe
 					}
+				case 0x09:
+					// Select transition layers
+					mixer.State.Layers = msg[2]
 				case 0x28:
 					// Update lamps on the controller
 					mixer.send_sources()
@@ -143,12 +147,24 @@ func (mixer *mixer) cut() {
 func (mixer *mixer) send_sources() {
 	state := mixer.State
 	pst := byte(state.PST)
-	if state.Value != 0 {
+	if state.Value != 0 && state.Layers&LayerBKGD != 0 {
 		pst |= 0xC0
 	}
 
 	mixer.TxChan <- []byte{0x86, 0x64, byte(state.PGM), 0x00}
 	mixer.TxChan <- []byte{0x86, 0x65, pst, 0x00}
+
+	if state.Key1 {
+		mixer.TxChan <- []byte{0x86, 0x66, 0x01, 0x00}
+	} else {
+		mixer.TxChan <- []byte{0x86, 0x66, 0x00, 0x00}
+	}
+
+	if state.Key2 {
+		mixer.TxChan <- []byte{0x86, 0x67, 0x01, 0x00}
+	} else {
+		mixer.TxChan <- []byte{0x86, 0x67, 0x00, 0x00}
+	}
 }
 
 func analog(msg []byte) int {
