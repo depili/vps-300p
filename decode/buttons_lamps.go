@@ -51,14 +51,15 @@ func decode_button_lamp(msg []byte) string {
 		}
 	case 0x09:
 		// top row of 6 buttons next to t-bar
-		// key1 button sends nothing in current config
-		switch msg[2] {
-		case 0x00:
-			decode = "BKGD, Key 1, Key 2 toggle off"
-		case 0x01:
-			decode = "BKGD toggle on"
-		case 0x02:
-			decode = "Key1 toggle on"
+		decode = "Transition layers: "
+		if msg[2]&0x01 != 0 {
+			decode = fmt.Sprintf("%s <BKGD>", decode)
+		}
+		if msg[2]&0x02 != 0 {
+			decode = fmt.Sprintf("%s <Key2>", decode)
+		}
+		if msg[2]&0x04 != 0 {
+			decode = fmt.Sprintf("%s <Key1>", decode)
 		}
 	case 0x0C:
 		// Key source
