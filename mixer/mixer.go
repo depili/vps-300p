@@ -44,6 +44,8 @@ func Init(serialConfig serial.Config) *mixer {
 		rxChan: make(chan []byte),
 		TxChan: make(chan []byte),
 	}
+
+	// TODO: Initialize the controller for the same values!
 	mixer.State = &MixerState{
 		PGM:    0,
 		PST:    0,
@@ -52,6 +54,22 @@ func Init(serialConfig serial.Config) *mixer {
 		Value:  0,
 		Layers: 0,
 	}
+
+	keyState := &KeyerState{
+		MattSat:      0,
+		MattLum:      0,
+		MattHue:      0,
+		Edge:         0,
+		EdgeSat:      0,
+		EdgeLum:      0,
+		EdgeHue:      0,
+		Transparency: 0,
+		ShadowX:      0,
+		ShadowY:      0,
+	}
+
+	mixer.State.Key1State = keyState.copy()
+	mixer.State.Key2State = keyState.copy()
 
 	go serial_worker.Init(serialConfig, mixer.rxChan, mixer.TxChan)
 	go mixer.stateKeeper()
@@ -67,6 +85,24 @@ func (mixer *mixer) stateKeeper() {
 			case 0x84:
 				// Analog readings
 				switch msg[1] {
+				case 0x1E:
+					// Key1 matte hue
+					mixer.State.Key1State.MattHue = analog(msg)
+				case 0x1F:
+					// Key1 matte saturation
+					mixer.State.Key1State.MattSat = analog(msg)
+				case 0x20:
+					// Key1 matte luminance
+					mixer.State.Key1State.MattLum = analog(msg)
+				case 0x21:
+					// Key2 matte hue
+					mixer.State.Key2State.MattHue = analog(msg)
+				case 0x22:
+					// Key2 matte saturation
+					mixer.State.Key2State.MattSat = analog(msg)
+				case 0x23:
+					// Key2 matte luminance
+					mixer.State.Key2State.MattLum = analog(msg)
 				case 0x4D:
 					// T-bar
 					value := analog(msg)

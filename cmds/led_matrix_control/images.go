@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/depili/go-rgb-led-matrix/matrix"
 	"github.com/depili/vps-300p/mixer"
+	"github.com/hsluv/hsluv-go"
 	"image"
 	"image/color"
 	"image/draw"
@@ -55,10 +56,22 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA, key1Chan chan [][]bool) {
 			draw.Draw(images.Out, images.Out.Bounds(), images.PGM, image.ZP, draw.Src)
 		}
 
+		// Keyer 1
+		hue := float64(state.Key1State.MattHue) / 1023.0 * 360.0
+		sat := float64(state.Key1State.MattSat) / 1023.0 * 100.0
+		lum := float64(state.Key1State.MattLum) / 1023.0 * 100.0
+		matt_r, matt_g, matt_b := hsluv.HsluvToRGB(hue, sat, lum)
+		matt := color.RGBA{byte(matt_r * 255.0), byte(matt_g * 255.0), byte(matt_b * 255.0), 255}
+		key1Insert := &image.Uniform{matt}
+
 		fill := color.RGBA{0, 0, 0, 255}
 		if state.Layers&mixer.LayerKey1 != 0 && state.Value != 0 {
 			// Key1 transition
-			fill = color.RGBA{0, 0, 0, byte(state.Value / 4)}
+			if state.Key1 {
+				fill = color.RGBA{0, 0, 0, byte(255 - state.Value/4)}
+			} else {
+				fill = color.RGBA{0, 0, 0, byte(state.Value / 4)}
+			}
 			for r := range key1mask {
 				for c := range key1mask[0] {
 					if key1mask[r][c] {
@@ -83,7 +96,7 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA, key1Chan chan [][]bool) {
 				image.ZP, draw.Src)
 		}
 
-		draw.DrawMask(images.Out, images.Out.Bounds(), images.PST,
+		draw.DrawMask(images.Out, images.Out.Bounds(), key1Insert,
 			image.ZP, images.Key1, image.ZP, draw.Over)
 
 		b := images.Out.Bounds()
