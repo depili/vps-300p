@@ -34,23 +34,22 @@ func (state *MixerState) copy() MixerState {
 
 func (state *MixerState) cut() MixerState {
 	s := state.copy()
-	p := state.PGM
-	s.PGM = state.PST
-	s.PST = p
-	return s
-}
-
-func (state *MixerState) transComplete() MixerState {
-	s := state.copy()
 	if s.Layers&LayerBKGD != 0 {
-		s = s.cut()
+		p := state.PGM
+		s.PGM = state.PST
+		s.PST = p
 	}
 	if s.Layers&LayerKey1 != 0 {
 		s.Key1 = !s.Key1
 	}
 	if s.Layers&LayerKey2 != 0 {
-		s.Key1 = !s.Key2
+		s.Key2 = !s.Key2
 	}
+	return s
+}
+
+func (state *MixerState) transComplete() MixerState {
+	s := state.cut()
 	s.Dir = !s.Dir
 	s.Value = 0
 
