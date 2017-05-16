@@ -23,7 +23,7 @@ func initText(text, font string, x, y, length int) {
 }
 
 func runText(tick chan bool, key1Chan, key2Chan chan [][]bool) {
-	initText("Huomenta helsinki.hacklab.fi", "10x20.bdf", 0, 20, matrix_width)
+	initText("Huomenta helsinki.hacklab.fi  -  ", "10x20.bdf", 0, 20, matrix_width)
 	offset := 0
 	for key := range tick {
 		img := scrollText(offset)
