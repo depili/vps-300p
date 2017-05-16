@@ -76,6 +76,10 @@ func main() {
 
 	ticker := time.NewTicker(time.Millisecond * time.Duration(Options.TickRate))
 
+	// Send the PGM framerate
+	fps := 1000.0 / float64(Options.TickRate)
+	mixer.TxChan <- []byte{0x86, 0x37, byte(fps * 2), 0x00}
+
 	for {
 		select {
 		case <-ticker.C:

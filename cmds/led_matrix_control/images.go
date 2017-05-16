@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/depili/go-rgb-led-matrix/matrix"
 	"github.com/depili/vps-300p/mixer"
+	"github.com/depili/vps-300p/patterns"
 	"github.com/hsluv/hsluv-go"
 	"image"
 	"image/color"
@@ -44,11 +45,43 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA, key1Chan chan [][]bool) {
 
 		state := <-stateChan
 
-		alpha := image.NewUniform(color.RGBA{0, 0, 0, byte(state.Value / 4)})
-		// alpha_inv := image.NewUniform(color.RGBA{0, 0, 0, 255 - byte(state.Value/4)})
+		var alpha image.Image
 
-		if state.Layers&mixer.LayerBKGD != 0 {
-			// Background transition possible
+		// Determinate the alpha for the transition
+		if state.Type == mixer.TransMix {
+			// Mix transition
+			alpha = image.NewUniform(color.RGBA{0, 0, 0, byte(state.Value / 4)})
+			// alpha_inv := image.NewUniform(color.RGBA{0, 0, 0, 255 - byte(state.Value/4)})
+		} else {
+			// Wipe transition
+
+			v := state.Value
+			r := state.PatternRev
+
+			switch state.Pattern {
+			case 0:
+				alpha = patterns.NewPattern000(matrix_width, matrix_height, v, r)
+			case 1:
+				alpha = patterns.NewPattern001(matrix_width, matrix_height, v, r)
+			case 2:
+				alpha = patterns.NewPattern002(matrix_width, matrix_height, v, r)
+			case 3:
+				alpha = patterns.NewPattern003(matrix_width, matrix_height, v, r)
+			case 4:
+				alpha = patterns.NewPattern004(matrix_width, matrix_height, v, r)
+			case 5:
+				alpha = patterns.NewPattern005(matrix_width, matrix_height, v, r)
+			case 6:
+				alpha = patterns.NewPattern006(matrix_width, matrix_height, v, r)
+			case 41:
+				alpha = patterns.NewPattern041(matrix_width, matrix_height, v, r)
+			default:
+				alpha = patterns.NewPattern000(matrix_width, matrix_height, v, r)
+			}
+		}
+
+		if state.Layers&mixer.LayerBKGD != 0 && state.Value != 0 {
+			// Background transition in progress
 			draw.Draw(images.Out, images.Out.Bounds(), images.PGM, image.ZP, draw.Src)
 			draw.DrawMask(images.Out, images.Out.Bounds(), images.PST,
 				image.ZP, alpha, image.ZP, draw.Over)

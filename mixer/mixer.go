@@ -132,11 +132,22 @@ func (mixer *mixer) stateKeeper() {
 					mixer.State.PGM = msg[2] & 0x0F
 				case 0x02:
 					mixer.State.PST = msg[2] & 0x0F
+				case 0x03:
+					// Pattern number
+					mixer.State.Pattern = analog(msg)
 				case 0x04:
+					// Transition type mix/wipe
 					if msg[2] == 0x00 {
 						mixer.State.Type = TransMix
 					} else {
 						mixer.State.Type = TransWipe
+					}
+				case 0x05:
+					// Pattern reverse toggle
+					if msg[2] == 0x00 {
+						mixer.State.PatternRev = false
+					} else {
+						mixer.State.PatternRev = true
 					}
 				case 0x09:
 					// Select transition layers
