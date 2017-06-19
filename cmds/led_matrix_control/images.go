@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/anthonynsimon/bild/effect"
 	"github.com/depili/go-rgb-led-matrix/matrix"
 	"github.com/depili/vps-300p/mixer"
 	"github.com/depili/vps-300p/patterns"
@@ -73,6 +74,8 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA, key1Chan chan [][]bool) {
 				alpha = patterns.NewPattern005(matrix_width, matrix_height, v, r)
 			case 6:
 				alpha = patterns.NewPattern006(matrix_width, matrix_height, v, r)
+			case 33:
+				alpha = patterns.NewPattern033(matrix_width, matrix_height, v, r)
 			case 41:
 				alpha = patterns.NewPattern041(matrix_width, matrix_height, v, r)
 			default:
@@ -85,6 +88,20 @@ func imageWorker(pgmChan, pstChan chan *image.NRGBA, key1Chan chan [][]bool) {
 			draw.Draw(images.Out, images.Out.Bounds(), images.PGM, image.ZP, draw.Src)
 			draw.DrawMask(images.Out, images.Out.Bounds(), images.PST,
 				image.ZP, alpha, image.ZP, draw.Over)
+
+			wipeState := state.WipeState
+			if wipeState.BorderType != mixer.BorderOff && wipeState.Border > 0 {
+				// Draw border around the wipe pattern
+				hue := float64(wipeState.MattHue) / 1023.0 * 360.0
+				sat := float64(wipeState.MattSat) / 1023.0 * 100.0
+				lum := float64(wipeState.MattLum) / 1023.0 * 100.0
+				matt_r, matt_g, matt_b := hsluv.HsluvToRGB(hue, sat, lum)
+				matt := color.RGBA{byte(matt_r * 255.0), byte(matt_g * 255.0), byte(matt_b * 255.0), 255}
+
+				borderMask := effect.EdgeDetection(alpha, float64(wipeState.Border))
+				draw.DrawMask(images.Out, images.Out.Bounds(), &image.Uniform{matt},
+					image.ZP, borderMask, image.ZP, draw.Over)
+			}
 		} else {
 			draw.Draw(images.Out, images.Out.Bounds(), images.PGM, image.ZP, draw.Src)
 		}

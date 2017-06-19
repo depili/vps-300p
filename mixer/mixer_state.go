@@ -1,16 +1,17 @@
 package mixer
 
 type MixerState struct {
-	PGM        byte // Active PGM selection
-	PST        byte // Active PST selection
-	Type       int  // Transition type (Mix or Wipe)
-	Dir        bool // true == upwards, false == downwards
-	Value      int  // T-bar value 0-1023
-	Layers     byte // Layers to transition
-	Key1       bool // Key1 led state
-	Key2       bool // Key2 led state
-	Pattern    int  // Pattern number
-	PatternRev bool // Reverse pattern
+	PGM        byte       // Active PGM selection
+	PST        byte       // Active PST selection
+	Type       int        // Transition type (Mix or Wipe)
+	Dir        bool       // true == upwards, false == downwards
+	Value      int        // T-bar value 0-1023
+	Layers     byte       // Layers to transition
+	Key1       bool       // Key1 led state
+	Key2       bool       // Key2 led state
+	Pattern    int        // Pattern number
+	PatternRev bool       // Reverse pattern
+	WipeState  *WipeState // Wipe transition state
 	Key1State  *KeyerState
 	Key2State  *KeyerState
 }
@@ -29,6 +30,7 @@ func (state *MixerState) copy() MixerState {
 		PatternRev: state.PatternRev,
 		Key1State:  state.Key1State.copy(),
 		Key2State:  state.Key1State.copy(),
+		WipeState:  state.WipeState.copy(),
 	}
 }
 

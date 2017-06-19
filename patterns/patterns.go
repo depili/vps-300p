@@ -3,6 +3,7 @@ package patterns
 import (
 	"image"
 	"image/color"
+	"math/rand"
 )
 
 func mask(pattern bool) color.Color {
@@ -158,6 +159,36 @@ func (p *pattern006) At(x, y int) color.Color {
 
 func NewPattern006(w, h, value int, r bool) *pattern006 {
 	return &pattern006{image.Rect(0, 0, w, h), value, r}
+}
+
+// Pattern 033: Random noise wipe
+type pattern033 struct {
+	Rect  image.Rectangle
+	State int
+	Rev   bool
+}
+
+func (p *pattern033) ColorModel() color.Model {
+	return color.AlphaModel
+}
+
+func (p *pattern033) Bounds() image.Rectangle {
+	return p.Rect
+}
+
+func (p *pattern033) At(x, y int) color.Color {
+	s := p.State
+	if !p.Rev {
+		s = 1023 - s
+	}
+	if rand.Int31n(1024) < int32(s) {
+		return mask(false)
+	}
+	return mask(true)
+}
+
+func NewPattern033(w, h, value int, r bool) *pattern033 {
+	return &pattern033{image.Rect(0, 0, w, h), value, r}
 }
 
 // Pattern 041: towards center wipe

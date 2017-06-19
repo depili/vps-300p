@@ -33,6 +33,12 @@ const (
 	LayerKey2 = 0x02
 )
 
+const (
+	BorderOff    = iota
+	BorderMatte  = iota
+	BorderDesign = iota
+)
+
 type mixer struct {
 	rxChan chan []byte
 	TxChan chan []byte
@@ -52,8 +58,18 @@ func Init(serialConfig serial.Config) *mixer {
 		Type:   TransWipe,
 		Dir:    true,
 		Value:  0,
-		Layers: 0,
+		Layers: LayerBKGD,
 	}
+
+	wipeState := &WipeState{
+		MattSat:    0,
+		MattLum:    0,
+		MattHue:    0,
+		Border:     0,
+		BorderType: BorderOff,
+	}
+
+	mixer.State.WipeState = wipeState
 
 	keyState := &KeyerState{
 		MattSat:      0,
@@ -103,6 +119,15 @@ func (mixer *mixer) stateKeeper() {
 				case 0x23:
 					// Key2 matte luminance
 					mixer.State.Key2State.MattLum = analog(msg)
+				case 0x32:
+					// Wipe border width
+					mixer.State.WipeState.Border = analog(msg)
+				case 0x37:
+					mixer.State.WipeState.MattHue = analog(msg)
+				case 0x38:
+					mixer.State.WipeState.MattSat = analog(msg)
+				case 0x39:
+					mixer.State.WipeState.MattLum = analog(msg)
 				case 0x4D:
 					// T-bar
 					value := analog(msg)
@@ -112,6 +137,7 @@ func (mixer *mixer) stateKeeper() {
 							s := mixer.State.transComplete()
 							mixer.TxChan <- []byte{0x86, 0x6A, 0x01, 0x00} // Upwards arrow
 							mixer.State = &s
+							mixer.send_sources()
 						} else {
 							mixer.State.Value = value
 						}
@@ -120,11 +146,11 @@ func (mixer *mixer) stateKeeper() {
 							s := mixer.State.transComplete()
 							mixer.TxChan <- []byte{0x86, 0x6A, 0x00, 0x00} // Downwards arrow
 							mixer.State = &s
+							mixer.send_sources()
 						} else {
 							mixer.State.Value = 1023 - value
 						}
 					}
-					mixer.send_sources()
 				}
 			case 0x86:
 				switch msg[1] {
@@ -148,6 +174,16 @@ func (mixer *mixer) stateKeeper() {
 						mixer.State.PatternRev = false
 					} else {
 						mixer.State.PatternRev = true
+					}
+				case 0x08:
+					// Wipe border type
+					switch msg[2] {
+					case 0x00:
+						mixer.State.WipeState.BorderType = BorderOff
+					case 0x01:
+						mixer.State.WipeState.BorderType = BorderMatte
+					case 0x02:
+						mixer.State.WipeState.BorderType = BorderDesign
 					}
 				case 0x09:
 					// Select transition layers
