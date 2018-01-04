@@ -62,7 +62,7 @@ func main() {
 	go runBlack(effChans[0], pgmChan, pstChan)
 	go runPlasma(effChans[1], pgmChan, pstChan)
 	go runFlame(effChans[2], pgmChan, pstChan)
-	go runBlack(effChans[3], pgmChan, pstChan)
+	go runGol(effChans[3], pgmChan, pstChan)
 	go runBlack(effChans[4], pgmChan, pstChan)
 	go runBlack(effChans[5], pgmChan, pstChan)
 	go runBlack(effChans[6], pgmChan, pstChan)
