@@ -181,7 +181,7 @@ func (p *pattern033) At(x, y int) color.Color {
 	if !p.Rev {
 		s = 1023 - s
 	}
-	if rand.Int31n(1024) < int32(s) {
+	if rand.Intn(1024) < s {
 		return mask(false)
 	}
 	return mask(true)
