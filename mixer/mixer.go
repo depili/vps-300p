@@ -55,7 +55,7 @@ func Init(serialConfig serial.Config) *mixer {
 	mixer.State = &MixerState{
 		PGM:    0,
 		PST:    0,
-		Type:   TransWipe,
+		Type:   TransMix,
 		Dir:    true,
 		Value:  0,
 		Layers: LayerBKGD,
@@ -89,7 +89,7 @@ func Init(serialConfig serial.Config) *mixer {
 
 	go serial_worker.Init(serialConfig, mixer.rxChan, mixer.TxChan)
 	go mixer.stateKeeper()
-
+	mixer.set_pattern_keys()
 	return &mixer
 }
 
@@ -150,6 +150,15 @@ func (mixer *mixer) stateKeeper() {
 						} else {
 							mixer.State.Value = 1023 - value
 						}
+					}
+					// Bright PST button on transition in progress
+					if value != 0 && mixer.State.Layers&LayerBKGD != 0 {
+						pst := byte(mixer.State.PST)
+						pst |= 0xC0
+						mixer.TxChan <- []byte{0x86, 0x65, pst, 0x00}
+					} else {
+						pst := byte(mixer.State.PST)
+						mixer.TxChan <- []byte{0x86, 0x65, pst, 0x00}
 					}
 				}
 			case 0x86:
@@ -248,6 +257,18 @@ func (mixer *mixer) send_sources() {
 	} else {
 		mixer.TxChan <- []byte{0x86, 0x67, 0x00, 0x00}
 	}
+}
+
+func (mixer *mixer) set_pattern_keys() {
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x01, 0x80} // Orange 1 -> pattern 1
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x02, 0x84} // Orange 2 -> pattern 2
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x03, 0x88} // Orange 3 -> pattern 3
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x04, 0x8C} // Orange 4 -> pattern 4
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x05, 0x90} // Orange 5 -> pattern 5
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x06, 0x94} // Orange 6 -> pattern 6
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x21, 0x98} // Orange 7 -> pattern 33
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x29, 0x9C} // Orange 8 -> pattern 41
+	mixer.TxChan <- []byte{0x86, 0x6C, 0x00, 0xA0} // Orange 9 -> pattern 0
 }
 
 func analog(msg []byte) int {
