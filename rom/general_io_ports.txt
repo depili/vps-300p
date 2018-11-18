@@ -1,0 +1,14 @@
+10      CTC channel 0
+11      CTC channel 1
+12      CTC channel 2
+13      CTC channel 3
+
+18      SIO Port A data
+19      SIO Port A command
+1A      SIO Port B data
+1B      SIO Port B command
+
+1C      PIO Port A data
+1D      PIO Port A command
+1E      PIO Port B data
+1F      PIO Port B command

@@ -1,0 +1,2 @@
+rom2: Main cpu receives data with PIO, PIO 1 selects device to listen?
+rom1: LCD cpu, does the output, handles the leds?

@@ -1,0 +1,53 @@
+Rom 1 (LCD and maybe leds?):
+
+mono yazd.exe --entry:0 --entry:0x02A5 --entry:0x020C --entry:0x0225 --entry:0x0252 --entry:0x026A --entry:0x0203 --entry:0x0215 --entry:0x0235 --entry:0x01D3 --entry:0x01DE --entry:0x01E2 --entry:0x01FF --entry:0x02D1 --entry:0x02D4 --html --lst --mwr --end:0x5A62 rom1.bin > rom1.html
+
+
+Interrupt vectors:
+
+0070: 02A5 - SIO Port A send?
+0072: 020C - OUT (1Bh), 10h
+0074: 0225 - SIO Port B receive?
+0076: 0252 - SIO Port B receive?
+0078: 026A - Long
+007A: 0203 - OUT (19h), 10h
+007C: 0215 - SIO Port A receive?
+007E: 0235 - SIO Port A receive?
+0080: 01D3 - Writes 0xFF to 0x9417, CTC?
+0082: 01DE - DI EI RETI
+0084: 01E2 - Memory stuff, CTC stuff?
+0086: 01FF - DI EI RETI
+0088: 02D1 - EI RETI
+008A: 02D4 - EI RETI
+
+L008C - Init LCD with "Turn on the mixer" message from 54E3
+L0136 - PIO init
+L015A - SIO init
+L0217 - CTC init
+L02E2 - Init port 44 & 45 device
+L0584 - Send reg A SIO port A?
+L0DE0 - Copy data from PIO port B to Port A? 0xF0 mask
+
+01FB - 0207 init data to port 19h
+0208 - 0216 init data to port 1Bh
+023C - 0244 CTC init data
+343D - 557F LCD message block
+54E3 - Turn on the mixer LCD message
+
+
+PIO Port A Out
+PIO Port B In & Out
+PIO ports seem to be connected to the LCD, probably hitachi protocol with 8 bit data bus?
+
+
+Custom IO ports:
+00
+01
+02
+03
+
+44
+45
+
+48
+49

@@ -1,0 +1,60 @@
+Rom 2 (Main CPU):
+
+mono yazd.exe --entry:0 --entry:0x0012 --entry:0x032D --entry:0x02DA --entry:0x0294 --entry:0x02AD --entry:0x02DA --entry:0x02F2 --entry:0x028B --entry:0x029D --entry:0x02BD --entry:0x0256 --entry:0x027F --entry:0x0283 --entry:0x0287 --entry:0x035C --entry:0x0CAA --end:0x7F10 --entry:0x0C34 --entry:0x035F --html --lst --mwr rom2.bin > rom2.html
+
+Interrupt vectors:
+
+0070: 032D - Long, SIO Port B stuff?
+0072: 0294 - OUT (1hB), 10h
+0074: 02AD - Long, reads SIO port B stuff? [IN A, (1Ah) CALL L0C16]
+0076: 02DA - CALL L02E8 [OUT (1Bh), 30h; IN A, (1Ah); memory stuff]     -> SIO Port A receive?
+0078: 02F2 - Long, writes to SIO Port A
+007A: 028B - OUT (19h), 10h
+007C: 029D - Long [IN A, (18h) CALL L0B9E]
+007E: 02BD - CALL L02CB [OUT (19h), 30h; IN A, (18h); memory stuff]     -> SIO Port B receive?
+0080: 0256 - Increment values on few memory addresses
+0082: 027F - DI JP 8000 -> EI RETI?
+0084: 0283 - DI JP 8000 -> EI RETI?
+0086: 0287 - DI JP 8000 -> EI RETI?
+0088: 0359 - JP 8000 -> EI RETI?
+008A: 035C - JP 8000 -> EI RETI?
+
+
+1064h
+
+
+4E93h
+
+
+0CAA - Interrupt service routine?, SIO port B tavaraa?
+
+CTC Interrupt vectors 80-86? Only channel 0 used?
+
+L03B2: set PIO port A bit 1 on
+L03B9: Polls PIO port A bit 7
+L37BC: inits registers and memory?
+L3BAD: SIO port A TX
+L43FC: Read all ADC channels to memory
+L4538: Compare ADC values to old ones
+L476A: T-bar end position check?
+L479C: T-bar end position check?
+L7E26 ja L7E37 Set leds on two controllers?
+
+PIO port A In & out
+PIO port B In only
+
+PIO port A bit 7 = ADC conversion ready
+PIO port B bits 7,6,5 = 8279 keyboard controller IRQ lines, read at 0CCF, 0CEF and 0D0F
+
+SIO both ports bidirectional
+
+Custom IO ports:
+00 keyboard 1 data
+01 keyboard 1 command
+02 keyboard 2 data
+03 keyboard 2 command
+04 keyboard 3 data
+05 keyboard 3 command
+
+08 ADC mux selector
+09 ADC
