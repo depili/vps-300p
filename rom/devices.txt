@@ -1,0 +1,13 @@
+The various devices have been mapped to the CPUs as follows:
+
+- Beeper: Unknown
+- ADC:
+        rom2 cpu, IO port 0x09, writing 0xFF triggers conversion, PIO port A bit 7 is ADC conversion ready.
+        Data is read by two bytes from port 0x09, left justified 10bits
+- ADC mux selection:
+        rom2 cpu, IO port 0x08
+- Three 8279 keyboard controllers:
+        rom2 cpu, IO-ports 0x00-0x05, IRQ lines on PIO port B bits 5-7
+- LCD
+        rom1 cpu, PIO ports. PIO port A is the 8 bit data bus, PIO port B bits 0-2 are the control bits
+        hitachi protocol?
