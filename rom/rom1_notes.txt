@@ -26,19 +26,29 @@ L015A - SIO init
 L0217 - CTC init
 L02E2 - Init port 44 & 45 device
 L0584 - Send reg A SIO port A?
-L0DE0 - Copy data from PIO port B to Port A? 0xF0 mask
+L0DE0 - LCD data write?
+L0DFE - LCD data write?
+L0E1C - LCD data write?
+L0FA5 - Write 0x28 bytes to lcd?
+L0304 - Does stuff on IO ports 48 and 49, don't know what...
+L02D7 - Writes 80h to port 4B
 
 01FB - 0207 init data to port 19h
 0208 - 0216 init data to port 1Bh
 023C - 0244 CTC init data
+2428 - Jump table (referenced from L0FE6)
 343D - 557F LCD message block
 54E3 - Turn on the mixer LCD message
-
+5583 - Ram init data? referenced from L0FE6
 
 PIO Port A Out
 PIO Port B In & Out
-PIO ports seem to be connected to the LCD, probably hitachi protocol with 8 bit data bus?
+PIO ports seem to be connected to the LCD, probably hitachi protocol with port A as 8 bit data bus?
 
+PIO Port B:
+bit 0 - LCD? (L0DE0)
+bit 1 - LCD? (L0DFE)
+bit 2 - LCD? (L0E1C)
 
 Custom IO ports:
 00
@@ -51,3 +61,5 @@ Custom IO ports:
 
 48
 49
+
+4B - Gets written by L02D7 (only 80h written)

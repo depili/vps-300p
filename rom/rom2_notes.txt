@@ -19,7 +19,8 @@ Interrupt vectors:
 0088: 0359 - JP 8000 -> EI RETI?
 008A: 035C - JP 8000 -> EI RETI?
 
-
+0692h - Ram init data? copied from rom to ram at L06C4 and L07E2
+67D5h - Ram init data? copied from rom to ram at L0992
 1064h
 
 
@@ -43,8 +44,15 @@ L7E26 ja L7E37 Set leds on two controllers?
 PIO port A In & out
 PIO port B In only
 
-PIO port A bit 7 = ADC conversion ready
-PIO port B bits 7,6,5 = 8279 keyboard controller IRQ lines, read at 0CCF, 0CEF and 0D0F
+PIO port A:
+bit 0 = beeper?
+bit 7 = ADC conversion ready
+
+PIO port B:
+bit 5 = 8279 keyboard controller IRQ line, read at L0D0F
+bit 6 = 8279 keyboard controller IRQ line, read at L0CEF
+bit 7 = 8279 keyboard controller IRQ line, read at L0CCF
+bit 3 = ??? (L7CAA)
 
 SIO both ports bidirectional
 
