@@ -41,6 +41,8 @@ L02D7 - Writes 80h to port 4B
 54E3 - Turn on the mixer LCD message
 5583 - Ram init data? referenced from L0FE6
 
+
+
 PIO Port A Out
 PIO Port B In & Out
 PIO ports seem to be connected to the LCD, probably hitachi protocol with port A as 8 bit data bus?
