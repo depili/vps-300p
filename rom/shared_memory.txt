@@ -1,0 +1,22 @@
+The pcb has a 16kb dual port sram chip that is connected to both cpus.
+
+capture/vps-300p address.sr capture/vps-300p address_2.sr capture/vps-300p address_3_named.sr are captures from
+rom2 cpu address bus and the CS lines of the dual port ram
+
+capture/vps-300p address_rom1.sr and capture/vps-300p address_rom1_2_named.sr are similar captures from the rom1 cpu side
+
+The captures hint that there could be a 1kb window to the shared memory in E800 - EFFF in rom1 and F800-FFFF in rom2. The placement of stacks (rom1: E7FF rom2: F7FF) would support this. The reason for the 2kb offset between the windows on the two processors is UNKNOWN.
+
+### Rom1:
+
+L57A3, which is part of the main loop at L008C copies 1Bh bytes from EA00 to 941E. Rom2 CPU has 1Bh bytes of lamp status in FA00 (accessed and manipulated by the supposed lamp test sequence in L37BC rom2).
+
+Addresses E8xx seem to go to the shared ram. They are accessed from L102A in the rom via the table starting from 2F0Bh. For example table vector from 2F1Bh points to E808.
+
+This can be seen on the rom1 address captures by deducing that the 10XX addresses seen at the both sides of shared ram CE activation might be rom addresses...
+
+Other addresses (assuming A15 bit high) seen on the capture are: EAxx (refered by L57A3 LDIR), EDxx.
+
+### Rom2:
+
+Assuming A15 high the sigrok captures show accesses to F8xx, FAxx, FCxx and FDxx.
