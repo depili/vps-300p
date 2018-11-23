@@ -4,14 +4,14 @@ mono yazd.exe --entry:0 --entry:0x0012 --entry:0x032D --entry:0x02DA --entry:0x0
 
 Interrupt vectors:
 
-0070: 032D - Long, SIO Port B stuff?
-0072: 0294 - OUT (1hB), 10h
-0074: 02AD - Long, reads SIO port B stuff? [IN A, (1Ah) CALL L0C16]
-0076: 02DA - CALL L02E8 [OUT (1Bh), 30h; IN A, (1Ah); memory stuff]     -> SIO Port A receive?
-0078: 02F2 - Long, writes to SIO Port A
-007A: 028B - OUT (19h), 10h
-007C: 029D - Long [IN A, (18h) CALL L0B9E]
-007E: 02BD - CALL L02CB [OUT (19h), 30h; IN A, (18h); memory stuff]     -> SIO Port B receive?
+0070: 032D - Long, SIO Port B stuff?                                    (Ch B transmit buffer empty)
+0072: 0294 - OUT (1hB), 10h                                             (Ch B external / status change)
+0074: 02AD - Long, reads SIO port B stuff? [IN A, (1Ah) CALL L0C16]     (Ch B Receive character available)
+0076: 02DA - CALL L02E8 [OUT (1Bh), 30h; IN A, (1Ah); memory stuff]     (Ch B error)
+0078: 02F2 - Long, writes to SIO Port A                                 (Ch A trasmit buffer empty)
+007A: 028B - OUT (19h), 10h                                             (Ch A external / status change)
+007C: 029D - Long [IN A, (18h) CALL L0B9E]                              (Ch A Receive character available)
+007E: 02BD - CALL L02CB [OUT (19h), 30h; IN A, (18h); memory stuff]     (Ch A error)
 0080: 0256 - Increment values on few memory addresses
 0082: 027F - DI JP 8000 -> EI RETI?
 0084: 0283 - DI JP 8000 -> EI RETI?
@@ -21,10 +21,19 @@ Interrupt vectors:
 
 0692h - Ram init data? copied from rom to ram at L06C4 and L07E2
 67D5h - Ram init data? copied from rom to ram at L0992
+6D77h - Address table?
 1064h
 
 
 4E93h
+
+8053h - SIO Chan A RX buffer write pointer
+8057h - SIO Chan A RX buffer byte counter
+
+
+9262h - SIO Chan B RX buffer; pointer to byte count
+9361h - SIO Chan B TX buffer; pointer to byte count
+935Fh - SIO Chan B TX pointer to next char to send
 
 
 0CAA - Interrupt service routine?, SIO port B tavaraa?
@@ -58,7 +67,9 @@ bit 6 = 8279 keyboard controller IRQ line, read at L0CEF
 bit 7 = 8279 keyboard controller IRQ line, read at L0CCF
 bit 3 = ??? (L7CAA)
 
-SIO both ports bidirectional
+SIO both ports bidirectional.
+SIO Port A connected to the DA15 connector
+SIO Port B unknown
 
 Custom IO ports:
 00 keyboard 1 data

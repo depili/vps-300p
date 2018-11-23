@@ -5,14 +5,14 @@ mono yazd.exe --entry:0 --entry:0x02A5 --entry:0x020C --entry:0x0225 --entry:0x0
 
 Interrupt vectors:
 
-0070: 02A5 - SIO Port A send?
-0072: 020C - OUT (1Bh), 10h
-0074: 0225 - SIO Port B receive?
-0076: 0252 - SIO Port B receive?
-0078: 026A - Long
-007A: 0203 - OUT (19h), 10h
-007C: 0215 - SIO Port A receive?
-007E: 0235 - SIO Port A receive?
+0070: 02A5 - SIO Port A send?                   (Ch B transmit buffer empty)
+0072: 020C - OUT (1Bh), 10h                     (Ch B external / status change)
+0074: 0225 - SIO Port B receive?                (Ch B Receive character available)
+0076: 0252 - SIO Port B receive?                (Ch B error)
+0078: 026A - Long                               (Ch A trasmit buffer empty)
+007A: 0203 - OUT (19h), 10h                     (Ch A external / status change)
+007C: 0215 - SIO Port A receive?                (Ch A Receive character available)
+007E: 0235 - SIO Port A receive?                (Ch A error)
 0080: 01D3 - Writes 0xFF to 0x9417, CTC?
 0082: 01DE - DI EI RETI
 0084: 01E2 - Memory stuff, CTC stuff?
