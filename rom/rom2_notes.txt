@@ -33,12 +33,16 @@ CTC Interrupt vectors 80-86? Only channel 0 used?
 
 L03B2: set PIO port A bit 1 on
 L03B9: Polls PIO port A bit 7
-L37BC: inits registers and memory?
+L19B2: PST row button 1 button handler?
+L1BF7: Keyer1 button handler?
+L37BC: Lamp test?
 L3BAD: SIO port A TX
 L43FC: Read all ADC channels to memory
 L4538: Compare ADC values to old ones
 L476A: T-bar end position check?
 L479C: T-bar end position check?
+L7565: Copy internal 94XXh memory to shared FEXXh?
+L7CF0: Reset
 L7E26 ja L7E37 Set leds on two controllers?
 
 PIO port A In & out
