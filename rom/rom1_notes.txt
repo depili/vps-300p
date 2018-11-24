@@ -25,10 +25,12 @@ L0136 - PIO init
 L015A - SIO init
 L0217 - CTC init
 L02E2 - Init port 44 & 45 device
+L0376 - LCD register init
 L0584 - Send reg A SIO port A?
-L0DE0 - LCD data write?
-L0DFE - LCD data write?
-L0E1C - LCD data write?
+L0DE0 - LCD control register write
+L0DFE - LCD 2 data write (0000 -> 0010 -> data write -> 0000)
+L0E1C - LCD 1 data write (0000 -> 0001 -> data write -> 0000)
+L0E58 - LCD 1 set ddram addr
 L0FA5 - Write 0x28 bytes to lcd?
 L0304 - Does stuff on IO ports 48 and 49, don't know what...
 L02D7 - Writes 80h to port 4B

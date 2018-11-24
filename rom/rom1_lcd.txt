@@ -1,0 +1,27 @@
+LCD is driven by hitachi compatible S6A0069 chips, two chips in total. LCD is 4 lines by 40 characters.
+First two rows are on controller 1, last two on controller 2. Both controllers share the RS bit and the
+8 bit data bus.
+
+The data bus is in rom1 PIO port A and the control lines are on PIO port B as follows:
+bit     function
+0       E for controller 1
+1       E for controller 2
+2       RS (common)
+3       R/W? (this bit is always set to 0)
+
+LCD init data:
+30h x3 0011 0000 Function set: data length 8
+38h    0011 1000 Function set: data length 8 lines: 4
+0Ch    0000 1100 Display on: display on, cursor off, cursor blink off
+06h    0000 0110 Entry mode: Increment, no display shift
+
+
+Relevant labels on rom1:
+
+L0376 - LCD init
+L0DE0 - LCD controller 1 register write
+L0F0B - LCD controller 2 register write
+L0E1C - LCD controller 1 character write
+L0DFE - LCD controller 2 character write
+L0E58 - LCD controller 1 set ddram addr
+L0E7A - LCD controller 2 set ddram addr
