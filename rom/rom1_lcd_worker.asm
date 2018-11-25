@@ -1,7 +1,7 @@
 START:
 	DI
 	IM	2
-	LD	A,00h
+	LD	A,INTERRUPT_VECTORS / 0x0100
 	LD	I,A
 	LD	SP,0E7FFh	; Stack pointer
 	CALL	INIT1
@@ -40,10 +40,12 @@ INTERRUPT_VECTORS:
 	DW	SIO_A_STATUS_CHANGE
 	DW	SIO_A_RX_AVAILABLE
 	DW	SIO_A_ERROR
+CTC_VECTORS:
 	DW	CTC_CH1
 	DW	CTC_CH2
 	DW	CTC_CH3
 	DW	CTC_CH4
+PIO_VECTORS:
 	DW	PIO_A
 	DW	PIO_B
 
@@ -237,23 +239,12 @@ INIT_PIO:
 
 PIO_A_DATA:
 	DB	0CFh
-	DB	00h
-	DB	07h
+	DB	00h	; All pins outputs
+	DB	07h	; No interrupts
 PIO_B_DATA:
 	DB	0CFh
-	DB	00h
-	DB	07h
-	DB	21h
-	DB	59h
-	DB	01h
-	DB	0Eh
-	DB	0F0h
-	DB	06h
-	DB	01h
-	DB	0EDh
-	DB	0B3h
-	DB	0C9h
-	DB	0BBh
+	DB	00h	; All pins outputs
+	DB	07h	; No interrupts
 
 	; --- L015A ---
 INIT_SIO:
@@ -297,7 +288,8 @@ SIO_B_DATA:
 	DB	05h
 	DB	0EAh
 	DB	02h
-	DB	70h	; 'p'
+	DB	INTERRUPT_VECTORS % 0x0100
+	; DB	70h	; 'p'
 	DB	10h
 	DB	01h
 	DB	16h
@@ -324,7 +316,7 @@ INIT_CTC:
 	RET
 
 CTC_1_DATA:
-	DB	80h
+	DB	CTC_VECTORS % 0x0100
 	DB	0DDh
 	DB	0Ch
 CTC_2_DATA:
