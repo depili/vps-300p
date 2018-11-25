@@ -13,10 +13,10 @@ Interrupt vectors:
 007A: 0203 - OUT (19h), 10h                     (Ch A external / status change)
 007C: 0215 - SIO Port A receive?                (Ch A Receive character available)
 007E: 0235 - SIO Port A receive?                (Ch A error)
-0080: 01D3 - Writes 0xFF to 0x9417, CTC?
-0082: 01DE - DI EI RETI
-0084: 01E2 - Memory stuff, CTC stuff?
-0086: 01FF - DI EI RETI
+0080: 01D3 - Writes 0xFF to 0x9417, CTC?        (CTC ch 1)
+0082: 01DE - DI EI RETI                         (CTC ch 2)
+0084: 01E2 - Memory stuff, CTC stuff?           (CTC ch 3)
+0086: 01FF - DI EI RETI                         (CTC ch 4)
 0088: 02D1 - EI RETI
 008A: 02D4 - EI RETI
 
