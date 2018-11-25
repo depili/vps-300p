@@ -1,3 +1,7 @@
+LCD_FLAG	EQU	0xEA00
+LCD_DATA	EQU	0xEA01
+LCD_LOCAL	EQU	0x1000
+
 START:
 	DI
 	IM	2
@@ -81,6 +85,7 @@ loop:	; LD	A,(9417h)	; Check flag 9417h, if not zero zero it and execute
 	; CALL	L0409		; Conditionally sends PING request
 loopend:
 	; CALL	L57BB		; Huge conditional tree
+	CALL	LCD_COPY	; Update LCD from shared memory
 	JP	loop
 ENDP
 
@@ -291,7 +296,7 @@ SIO_B_DATA:
 	DB	INTERRUPT_VECTORS % 0x0100
 	; DB	70h
 	DB	10h	; CMD reset status interrupts
-	DB	01h	: Write register 1
+	DB	01h	; Write register 1
 	DB	16h	; Transmit interrupt enable, receive interrupt on all characters, status affects vector
 
 
@@ -587,6 +592,26 @@ loop5:	DJNZ	loop5
 	POP	BC
 	RET
 ENDP
+
+	; Check LCD_FLAG location for non-zero value
+	; If so zero it and copy the new LCD data down
+	; to LCD_LOCAL and update the LCD
+LCD_COPY: PROC
+	LD	HL, LCD_FLAG
+	LD	A,(HL)
+	AND	A
+	JR	Z, return
+	LD	A, 0x00
+	LD	(HL), A
+	LD	HL,LCD_DATA
+	LD	DE,LCD_LOCAL
+	LD	BC,0xA0		; 160 bytes
+	LDIR
+	LD	HL,LCD_LOCAL
+	CALL	UPDATE_LCD
+return:	RET
+ENDP
+
 	; -- INTERRUPT HANDLERS --
 SIO_B_TX_EMPTY:
 	DI
