@@ -238,11 +238,11 @@ INIT_PIO:
 	RET
 
 PIO_A_DATA:
-	DB	0CFh
+	DB	0CFh	; Mode 3
 	DB	00h	; All pins outputs
 	DB	07h	; No interrupts
 PIO_B_DATA:
-	DB	0CFh
+	DB	0CFh	; Mode 3
 	DB	00h	; All pins outputs
 	DB	07h	; No interrupts
 
@@ -263,36 +263,36 @@ INIT_SIO:
 	RET
 
 SIO_A_DATA:
+	DB	00h	; Write register 0
 	DB	00h
-	DB	00h
-	DB	18h
-	DB	10h
-	DB	04h
-	DB	45h	; 'E'
-	DB	03h
-	DB	0C1h
-	DB	05h
-	DB	0EAh
-	DB	10h
-	DB	01h
-	DB	12h
+	DB	18h	; CMD error reset
+	DB	10h	; CMD reset status interrupts
+	DB	04h	; Write register 4
+	DB	45h	; 1,5 stop bits, even parity, 8bit programmed sync, data rate=16x clock rate
+	DB	03h	; Write register 3
+	DB	0C1h	; RX enable, 8 bits per character
+	DB	05h	; Write register 5
+	DB	0EAh	; TX crc disable, RTS low, TX enable, DTR low, external sync
+	DB	10h	; CMD reset status interrupts
+	DB	01h	; Write register 1
+	DB	12h	; Transmit interrupt enable, receive interrupt on all characters
 SIO_B_DATA:
+	DB	00h	; Write register 0
 	DB	00h
-	DB	00h
-	DB	18h
-	DB	10h
-	DB	04h
-	DB	45h	; 'E'
-	DB	03h
-	DB	0C1h
-	DB	05h
-	DB	0EAh
-	DB	02h
+	DB	18h	; CMD error reset
+	DB	10h	; CMD reset status interrupts
+	DB	04h	; Write register 4
+	DB	45h	; 1,5 stop bits, even parity, 8bit programmed sync, data rate=16x clock rate
+	DB	03h	; Write register 3
+	DB	0C1h	; RX enable, 8 bits per character
+	DB	05h	; Write register 5
+	DB	0EAh	; TX crc disable, RTS low, TX enable, DTR low, external sync
+	DB	02h	; Write register 2
 	DB	INTERRUPT_VECTORS % 0x0100
-	; DB	70h	; 'p'
-	DB	10h
-	DB	01h
-	DB	16h
+	; DB	70h
+	DB	10h	; CMD reset status interrupts
+	DB	01h	: Write register 1
+	DB	16h	; Transmit interrupt enable, receive interrupt on all characters, status affects vector
 
 
 	; --- L0194 ---
@@ -316,18 +316,18 @@ INIT_CTC:
 	RET
 
 CTC_1_DATA:
-	DB	CTC_VECTORS % 0x0100
-	DB	0DDh
-	DB	0Ch
+	DB	CTC_VECTORS % 0x0100	; Interrupt vector location
+	DB	0DDh	; Interrupt enabled, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
+	DB	0Ch	; Time constant
 CTC_2_DATA:
-	DB	5Dh
-	DB	01h
+	DB	5Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
+	DB	01h	; Time constant
 CTC_3_DATA:
-	DB	0A7h
-	DB	0A3h
+	DB	0A7h	; Interrupt enabled, timer, prescaler 16, falling edge, time constant follow, software reset
+	DB	0A3h	; Time constant
 CTC_4_DATA:
-	DB	5Dh
-	DB	01h
+	DB	5Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
+	DB	01h	; Time constant
 
 
 	; --- L00DC ---
