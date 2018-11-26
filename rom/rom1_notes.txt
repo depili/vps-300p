@@ -34,6 +34,7 @@ L0E58 - LCD 1 set ddram addr
 L0FA5 - LCD Write: 4x 28h (4x40) bytes from HL onwards to the LCD
 L0304 - Does stuff on IO ports 48 and 49, don't know what...
 L02D7 - Writes 80h to port 4B
+L5783 - Shifts button lamp data out via IOs 0x00 - 0x03
 
 01FB - 0207 init data to port 19h
 0208 - 0216 init data to port 1Bh
@@ -55,10 +56,10 @@ bit 1 - LCD? (L0DFE)
 bit 2 - LCD? (L0E1C)
 
 Custom IO ports:
-00
-01
-02
-03
+00 - Lamp data 74597 STCP aka latch
+01 - Lamp data 74597 DS
+02 - Lamp data 74597 SHCP aka clk
+03 - Lamp data output shift registers latch
 
 44
 45

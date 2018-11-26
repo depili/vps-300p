@@ -9,6 +9,13 @@ The various devices have been mapped to the CPUs as follows:
         rom2 cpu, IO port 0x08
 - Three 8279 keyboard controllers:
         rom2 cpu, IO-ports 0x00-0x05, IRQ lines on PIO port B bits 5-7
+        Controller 1 (IO 0x00 and 0x01) probably has all 7-segment displays on it
+        Controller 2 gets written into during the lamp test sequence, so it probably has some leds
+        Controller 3 isn't written to during the lamp test.
 - LCD
         rom1 cpu, PIO ports. PIO port A is the 8 bit data bus, PIO port B bits 0-2 are the control bits
         hitachi protocol.
+
+- Button lamps/leds:
+        rom1 CPU has a 74597 parallel in - serial out device connected to IOs 0x00-0x03. It is controlled
+        by L5783. This shifts data copied from EA00 shared memory out 0x1B bytes in total.
