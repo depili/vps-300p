@@ -1,6 +1,8 @@
-LCD_FLAG		EQU	0xEA00
-LCD_DATA		EQU	0xEA01
+LCD_FLAG		EQU	0xE800
+LCD_DATA		EQU	0xE801
 LCD_LOCAL		EQU	0x1000
+LAMP_SRC		EQU	0xEA00
+LAMP_DEST		EQU	0x9500
 SIO_CMD_NULL		EQU	0x00
 SIO_CMD_TX_ABORT	EQU	0x08
 SIO_CMD_RST_STATUS	EQU	0x10
@@ -81,8 +83,8 @@ ENDP
 
 MAIN_LOOP: PROC
 	LD	HL,LCD_SPLASH
-	CALL	UPDATE_LCD
-	; CALL	L57AF		; Copy 1Bh bytes from 0EA00h to 941Eh
+	CALL	LCD_UPDATE
+	CALL	LAMP_COPY	; Copy 1Bh bytes from LAMP_SRC to LAMP_DEST
 	; CALL	L5783		; Goes to the big jump table
 	; CALL	L00E5		; Send ping request, zero memory flags
 loop:	; LD	A,(9417h)	; Check flag 9417h, if not zero zero it and execute
@@ -90,15 +92,45 @@ loop:	; LD	A,(9417h)	; Check flag 9417h, if not zero zero it and execute
 	; JR	Z,loopend
 	; LD	A,00h
 	; LD	(9417h),A
-	; CALL	L57A3		; Copy 1Bh bytes from 0EA00h to 941Eh
+	CALL	LAMP_COPY	; Copy 1Bh bytes from LAMP_SRC to LAMP_DEST
 	; CALL	L05D3		; Goes to the big jump table
-	; CALL	L5783		; Output 1Bh bytes from 9438h down to ports 00h - 03h
+	CALL	LAMP_UPDATE	; Output 1Bh bytes from LAMP_DEST + 0x1A down to ports 00h - 03h
 	; CALL	L0409		; Conditionally sends PING request
 loopend:
 	; CALL	L57BB		; Huge conditional tree
 	CALL	LCD_COPY	; Update LCD from shared memory
 	JP	loop
 ENDP
+
+	; --- L5783 ---
+	; Shifts out 0x1B bytes to the various lamps
+LAMP_UPDATE: PROC
+	LD	HL,LAMP_DEST + 0x1A
+	LD	B,1Bh
+loop:	LD	A,(HL)
+	OUT	(01h),A
+	OUT	(00h),A
+	OUT	(03h),A
+	OUT	(03h),A
+	OUT	(03h),A
+	OUT	(03h),A
+	OUT	(03h),A
+	OUT	(03h),A
+	OUT	(03h),A
+	OUT	(03h),A
+	DEC	HL
+	DJNZ	loop
+	OUT	(02h),A
+	RET
+ENDP
+
+	; --- L57A3 ---
+LAMP_COPY:
+	LD	HL,LAMP_SRC
+	LD	DE,LAMP_DEST
+	LD	BC,001Bh
+	LDIR
+	RET
 
 	; --- L0304 ---
 	; Unknown, possibly unpopulated devices
@@ -455,7 +487,7 @@ LCD2_REGISTER:
 	RET
 
 	; Reads 160 bytes starting from HL and writes to the LCD
-UPDATE_LCD: PROC
+LCD_UPDATE: PROC
 	LD	A,00h
 	CALL	SET_LCD1_ADDR
 	LD	B,28h
@@ -619,7 +651,7 @@ LCD_COPY: PROC
 	LD	BC,0xA0		; 160 bytes
 	LDIR
 	LD	HL,LCD_LOCAL
-	CALL	UPDATE_LCD
+	CALL	LCD_UPDATE
 return:	RET
 ENDP
 
