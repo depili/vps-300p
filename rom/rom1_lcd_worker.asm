@@ -12,14 +12,16 @@ SIO_CMD_TX_IR_RST	EQU	0x28
 SIO_CMD_ERROR_RST	EQU	0x30
 SIO_CMD_RETI		EQU	0x38
 ORG 0x0
+
 START:
 	DI
 	IM	2
 	LD	A,INTERRUPT_VECTORS / 0x0100
 	LD	I,A
 	LD	SP,0E7FFh	; Stack pointer
-	CALL	INIT1
+	CALL	INIT1		; Sets up IO F4, F0 and F1, has a big delay in the end
 	JR	INIT2
+	; This region had what looks like a second start for the CPU?
 
 	; -- L0019 --
 INIT2:
@@ -43,6 +45,7 @@ INIT2:
 	LD	(890Ch),HL
 	; EI
 	JP	MAIN_LOOP
+
 	SEEK 0x70
 	ORG 0x70
 	; Interrupts
@@ -136,52 +139,52 @@ LAMP_COPY:
 	; Unknown, possibly unpopulated devices
 INIT_48_49: PROC
 	LD	A,0FFh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFF
 	LD	D,00h
 	LD	B,08h
 	LD	A,D
-	OUT	(48h),A
+	OUT	(48h),A ; 0x00
 	LD	A,0FCh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFC
 	AND	0FBh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xF8
 	LD	A,0FFh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFF
 loop1:	LD	A,0FFh
-	OUT	(48h),A
+	OUT	(48h),A ; 0xFF
 	LD	A,0FEh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFE
 	AND	0FBh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFB
 	LD	A,0FFh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFF
 	INC	D
-	DJNZ	loop1
+	DJNZ	loop1	; 8 times
 	LD	D,00h
 	LD	HL,INIT_48_DATA
 	LD	B,08h
 loop2:	LD	C,03h
 	LD	A,D
-	OUT	(48h),A
+	OUT	(48h),A	; 0x00 - 0x08
 	LD	A,0FCh
-	OUT	(49h),A
+	OUT	(49h),A	; 0xFC
 	AND	0FBh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFB
 	LD	A,0FFh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFF
 loop3:	LD	A,(HL)
-	OUT	(48h),A
+	OUT	(48h),A ; Data from table
 	LD	A,0FDh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFD
 	AND	0FBh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFB
 	LD	A,0FFh
-	OUT	(49h),A
+	OUT	(49h),A ; 0xFF
 	INC	HL
 	DEC	C
-	JP	NZ,loop3
+	JP	NZ,loop3	; 3 times
 	INC	D
-	DJNZ	loop2
+	DJNZ	loop2		; 8 times
 	RET
 ENDP
 
