@@ -61,10 +61,15 @@ Custom IO ports:
 02 - Lamp data 74597 SHCP aka clk
 03 - Lamp data output shift registers latch
 
-44
-45
+44 - Pairs written to 44 & 45 - 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+45 - Pairs written to 44 & 45 - 64 50 52 2C 1C 01 19 1A 50 0F 20 0F F8 00 F8 00
 
 48
 49
 
 4B - Gets written by L02D7 (only 80h written)
+
+F0 - Gets written 5Bh
+F1 - Gets written B1h
+
+F4 - Gets written 00h
