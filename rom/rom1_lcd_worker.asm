@@ -188,8 +188,8 @@ byte1:	POP	AF		; Restore the message
 
 byte2:	POP	AF
 	CP	LAMP_BYTES-1	; Assume this is a lamp byte set message
-	JP	C, err		; erroneus byte address
-	JP	return
+	JP	C, return	; Less than LAMP_BYTES-1
+	JP	err		; Otherwise erroneus message
 
 byte3:	POP	AF
 	LD	A, "P"
