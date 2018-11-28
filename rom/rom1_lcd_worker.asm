@@ -22,8 +22,8 @@ PIO_B_CMD		EQU	0x1F
 
 ; Memory
 RX_COUNTER		EQU	0x9000
-RX_POINTER		EQU	0x9001
-RX_TYPE			EQU	0x9002	; first byte of the message
+RX_POINTER		EQU	0x9002
+RX_TYPE			EQU	0x9004	; first byte of the message
 LCD_FLAG		EQU	0xE800
 LCD_DATA		EQU	0xE801
 LCD_LOCAL		EQU	0x1000
@@ -155,10 +155,8 @@ RX_INIT:
 	LD	A, 0x00		; Error in message, zero the counter and type
 	LD	(RX_COUNTER), A
 	LD	(RX_TYPE), A
-	LD	IX, RX_POINTER
 	LD	HL, RX_POINTER+1
-	LD	(IX), L
-	LD	(IX+1), H
+	LD	(RX_POINTER), HL
 	RET
 
 	; Process the byte in A
@@ -554,10 +552,10 @@ LCD_INIT:
 	LD	A,06h
 	CALL	LCD2_REGISTER
 	CALL	LCD_DELAY2
-	LD	HL,9450h
-	LD	(94F0h),HL
-	LD	A,00h
-	LD	(94F2h),A
+	; LD	HL,9450h
+	; LD	(94F0h),HL
+	; LD	A,00h
+	; LD	(94F2h),A
 	RET
 
 	; --- L0DE0 ---
