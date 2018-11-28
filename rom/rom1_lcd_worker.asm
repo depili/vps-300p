@@ -133,7 +133,7 @@ loop:	; LD	A,(9417h)	; Check flag 9417h, if not zero zero it and execute
 	; CALL	L0409		; Conditionally sends PING request
 loopend:
 	; CALL	L57BB		; Huge conditional tree
-	; CALL	LCD_COPY	; Update LCD from shared memory
+	CALL	LCD_COPY	; Update LCD from shared memory
 	LD A, "-"
 	CALL SIO_A_TX_BLOCKING
 	IN A, (00h)		; Wiggle some CS lines
@@ -164,7 +164,7 @@ RX_INIT:
 	LD	A, 0x00		; Error in message, zero the counter and type
 	LD	(RX_COUNTER), A
 	LD	(RX_TYPE), A
-	LD	HL, RX_POINTER+1
+	LD	HL, RX_POINTER+2
 	LD	(RX_POINTER), HL
 	RET
 
@@ -204,9 +204,11 @@ err:	CALL	RX_INIT		; Reset the counter, type and pointer
 	RET
 
 return:	LD	(RX_POINTER), A
-	LD	IX, RX_COUNTER
-	INC	(IX)
-	INC	(IX+1)
+	LD	HL, RX_COUNTER
+	INC	(HL)
+	LD	HL, (RX_POINTER)
+	INC	HL
+	LD	(RX_POINTER), HL
 	LD	A, (RX_COUNTER)	; Send the current RX counter to SIO A
 	ADD	A, 0x30		; ascii "0"
 	OUT	(SIO_A_DATA), A
