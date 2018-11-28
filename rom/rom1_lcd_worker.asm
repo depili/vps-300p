@@ -210,9 +210,9 @@ ENDP
 LAMP_MSG: PROC
 	LD	IX, RX_POINTER+1
 	LD	HL, LAMP_DEST
-	LD	A, L			; Add byte offset from the message
-	ADD	A, (IX+1)
-	LD	L, A
+	LD	B, 0x00
+	LD	C, (IX+1)		; Add byte offset from the message
+	ADD	HL, BC
 	LD	A, (IX+2)
 	LD	(HL), A			; Load the byte from message in place
 	RET
