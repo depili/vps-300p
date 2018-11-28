@@ -1,8 +1,3 @@
-LCD_FLAG		EQU	0xE800
-LCD_DATA		EQU	0xE801
-LCD_LOCAL		EQU	0x1000
-LAMP_SRC		EQU	0xEA00
-LAMP_DEST		EQU	0x9500
 SIO_CMD_NULL		EQU	0x00
 SIO_CMD_TX_ABORT	EQU	0x08
 SIO_CMD_RST_STATUS	EQU	0x10
@@ -11,6 +6,31 @@ SIO_CMD_EI_RX		EQU	0x20
 SIO_CMD_TX_IR_RST	EQU	0x28
 SIO_CMD_ERROR_RST	EQU	0x30
 SIO_CMD_RETI		EQU	0x38
+; IO PORTS
+CTC_CH1			EQU	0x10
+CTC_CH2			EQU	0x11
+CTC_CH3			EQU	0x12
+CTC_CH4			EQU	0x13
+SIO_A_DATA		EQU	0x18
+SIO_A_CMD		EQU	0x19
+SIO_B_DATA		EQU	0x1A
+SIO_B_CMD		EQU	0x1B
+PIO_A_DATA		EQU	0x1C
+PIO_A_CMD		EQU	0x1D
+PIO_B_DATA		EQU	0x1E
+PIO_B_CMD		EQU	0x1F
+
+; Memory
+RX_COUNTER		EQU	0x9000
+RX_TYPE			EQU	0x9001
+RX_POINTER		EQU	0x9002
+LCD_FLAG		EQU	0xE800
+LCD_DATA		EQU	0xE801
+LCD_LOCAL		EQU	0x1000
+LAMP_SRC		EQU	0xEA00
+LAMP_DEST		EQU	0x9500
+LAMP_BYTES		EQU	0x1A
+
 ORG 0x0
 
 START:
@@ -19,7 +39,7 @@ START:
 	LD	A,INTERRUPT_VECTORS / 0x0100
 	LD	I,A
 	LD	SP,0E7FFh	; Stack pointer
-	CALL	INIT1		; Sets up IO F4, F0 and F1, has a big delay in the end
+	; CALL	INIT1		; Sets up IO F4, F0 and F1, has a big delay in the end
 	JR	INIT2
 	; This region had what looks like a second start for the CPU?
 
@@ -39,33 +59,35 @@ INIT2:
 	; CALL	L0486 ; Sets up 920Dh - 9212h
 	; CALL	L0494 ; Sets up 930Dh - 9312h
 	; CALL	L0476 ; Sets up 8908h - 890Eh
-	LD	A,0FFh
-	LD	(9311h),A
-	LD	HL,0FFFFh	; address or value?
-	LD	(890Ch),HL
-	; EI
+	; LD	A,0FFh
+	; LD	(9311h),A
+	; LD	HL,0FFFFh	; address or value?
+	; LD	(890Ch),HL
+	EI
+	LD	A, "X"
+	OUT	(SIO_A_DATA), A
 	JP	MAIN_LOOP
 
 	SEEK 0x70
 	ORG 0x70
 	; Interrupts
 INTERRUPT_VECTORS:
-	DW	SIO_B_TX_EMPTY
-	DW	SIO_B_STATUS_CHANGE
-	DW	SIO_B_RX_AVAILABLE
-	DW	SIO_B_ERROR
-	DW	SIO_A_TX_EMPTY
-	DW	SIO_A_STATUS_CHANGE
-	DW	SIO_A_RX_AVAILABLE
-	DW	SIO_A_ERROR
+	DW	INT_SIO_B_TX_EMPTY
+	DW	INT_SIO_B_STATUS_CHANGE
+	DW	INT_SIO_B_RX_AVAILABLE
+	DW	INT_SIO_B_ERROR
+	DW	INT_SIO_A_TX_EMPTY
+	DW	INT_SIO_A_STATUS_CHANGE
+	DW	INT_SIO_A_RX_AVAILABLE
+	DW	INT_SIO_A_ERROR
 CTC_VECTORS:
-	DW	CTC_CH1
-	DW	CTC_CH2
-	DW	CTC_CH3
-	DW	CTC_CH4
+	DW	INT_CTC_CH1
+	DW	INT_CTC_CH2
+	DW	INT_CTC_CH3
+	DW	INT_CTC_CH4
 PIO_VECTORS:
-	DW	PIO_A
-	DW	PIO_B
+	DW	INT_PIO_A
+	DW	INT_PIO_B
 
 	SEEK 0x90
 	ORG 0x90
@@ -87,22 +109,110 @@ ENDP
 MAIN_LOOP: PROC
 	LD	HL,LCD_SPLASH
 	CALL	LCD_UPDATE
-	CALL	LAMP_COPY	; Copy 1Bh bytes from LAMP_SRC to LAMP_DEST
+	; CALL	LAMP_COPY	; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
 	; CALL	L5783		; Goes to the big jump table
 	; CALL	L00E5		; Send ping request, zero memory flags
+	CALL	RX_INIT		; Initialise receive counter, type, pointer
 loop:	; LD	A,(9417h)	; Check flag 9417h, if not zero zero it and execute
 	; AND	A
 	; JR	Z,loopend
 	; LD	A,00h
 	; LD	(9417h),A
-	CALL	LAMP_COPY	; Copy 1Bh bytes from LAMP_SRC to LAMP_DEST
+	; CALL	LAMP_COPY	; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
 	; CALL	L05D3		; Goes to the big jump table
-	CALL	LAMP_UPDATE	; Output 1Bh bytes from LAMP_DEST + 0x1A down to ports 00h - 03h
+	CALL	LAMP_UPDATE	; Output 1Ah bytes from LAMP_DEST + 0x1A down to ports 00h - 03h
 	; CALL	L0409		; Conditionally sends PING request
 loopend:
 	; CALL	L57BB		; Huge conditional tree
-	CALL	LCD_COPY	; Update LCD from shared memory
+	; CALL	LCD_COPY	; Update LCD from shared memory
+	LD A, "-"
+	CALL SIO_A_TX_BLOCKING
+	IN A, (00h)		; Wiggle some CS lines
+	IN A, (02h)
 	JP	loop
+ENDP
+
+	; Waits for TX buffer to be empty, then sends A
+SIO_A_TX_BLOCKING: PROC
+	LD 	D, A
+	CALL 	SIO_A_TX_CHECK
+	LD	A, D
+	OUT	(SIO_A_DATA), A	; Send the character
+	RET
+ENDP
+
+	; Wait until SIO A TX buffer is empty
+SIO_A_TX_CHECK: PROC
+	LD	A, 0x01		; Select register 1
+	OUT	(SIO_A_CMD), A
+	IN	A, (SIO_A_CMD)	; Read register 1
+	BIT	0, A		; Bit 0 is "All sent"
+	JP	Z, SIO_A_TX_CHECK
+	RET
+ENDP
+
+RX_INIT:
+	LD	A, 0x00		; Error in message, zero the counter and type
+	LD	(RX_COUNTER), A
+	LD	(RX_TYPE), A
+	LD	HL, RX_POINTER
+	LD	(HL), RX_POINTER+1
+	RET
+
+	; Process the byte in A
+SERIAL_RX_CMD: PROC
+	PUSH	A
+	LD	A, (HL)
+	AND	A
+	JP	Z, byte1:
+	CP	0x01		; Message type parsing should go in here eventually
+	JP	Z, byte2:
+	CP	0x02
+	JP	Z, byte3:
+	JP	error		; Only 3 bytes in the supported message
+
+byte1:	POP	A		; Restore the message
+	BIT	7, A		; First byte of a message has bit 7 set
+	JP	Z, error
+	LD	(RX_TYPE), A	; Store message type
+	JP	return
+
+byte2:	POP	A
+	CP	LAMP_BYTES	; Assume this is a lamp byte set message
+	JP	C, error	; erroneus byte address
+	JP	return
+
+byte3:	POP	A
+	LD	A, "P"
+	OUT	(SIO_A_DATA), A
+	CALL	LAMP_MSG	; process the lamp message
+	CALL	RX_INIT		; end of message
+	RET
+
+error:	CALL	RX_INIT		; Reset the counter, type and pointer
+	LD	A, "E"
+	OUT	(SIO_A_DATA), A
+	RET
+
+return:	LD	(RX_POINTER), A
+	INC	RX_POINTER
+	INC	RX_COUNTER
+	LD	A, (RX_COUNTER)	; Send the current RX counter to SIO A
+	ADD	0x30		; ascii "0"
+	OUT	(SIO_A_DATA), A
+	RET
+ENDP
+
+
+LAMP_MSG: PROC
+	LD	IX, RX_POINTER+1
+	LD	HL, LAMP_DEST
+	LD	A, L			; Add byte offset from the message
+	ADD	(IX+1)
+	LD	L, A
+	LD	DE, (IX+2)
+	LD	(HL), DE		; Load the byte from message in place
+	RET
 ENDP
 
 	; --- L5783 ---
@@ -278,32 +388,32 @@ INIT_4B_DATA:
 
 	; --- L0136 ---
 INIT_PIO:
-	LD	HL,PIO_A_DATA
+	LD	HL,PIO_A_INIT_DATA
 	LD	C,1Dh
 	LD	B,03h
 	OTIR
-	LD	HL,PIO_B_DATA
+	LD	HL,PIO_B_INIT_DATA
 	LD	C,1Fh
 	LD	B,03h
 	OTIR
 	RET
 
-PIO_A_DATA:
+PIO_A_INIT_DATA:
 	DB	0CFh	; Mode 3
 	DB	00h	; All pins outputs
 	DB	07h	; No interrupts
-PIO_B_DATA:
+PIO_B_INIT_DATA:
 	DB	0CFh	; Mode 3
 	DB	00h	; All pins outputs
 	DB	07h	; No interrupts
 
 	; --- L015A ---
 INIT_SIO:
-	LD	HL,SIO_A_DATA
+	LD	HL,SIO_A_INIT_DATA
 	LD	C,19h
 	LD	B,0Dh
 	OTIR
-	LD	HL,SIO_B_DATA
+	LD	HL,SIO_B_INIT_DATA
 	LD	C,1Bh
 	LD	B,0Fh
 	OTIR
@@ -313,7 +423,7 @@ INIT_SIO:
 	LD	(9413h),A
 	RET
 
-SIO_A_DATA:
+SIO_A_INIT_DATA:
 	DB	00h	; Write register 0
 	DB	00h
 	DB	18h	; CMD error reset
@@ -327,7 +437,7 @@ SIO_A_DATA:
 	DB	10h	; CMD reset status interrupts
 	DB	01h	; Write register 1
 	DB	12h	; Transmit interrupt enable, receive interrupt on all characters
-SIO_B_DATA:
+SIO_B_INIT_DATA:
 	DB	00h	; Write register 0
 	DB	00h
 	DB	18h	; CMD error reset
@@ -659,177 +769,180 @@ return:	RET
 ENDP
 
 	; -- INTERRUPT HANDLERS --
-SIO_B_TX_EMPTY:
+INT_SIO_B_TX_EMPTY:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
+
+INT_SIO_B_STATUS_CHANGE:
+	DI
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
 	JP 0x8000
 
-SIO_B_STATUS_CHANGE:
+INT_SIO_B_RX_AVAILABLE:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	IN	A, (SIO_B_DATA)
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
 	JP 0x8000
 
-SIO_B_RX_AVAILABLE:
+INT_SIO_B_ERROR:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
-
-SIO_B_ERROR:
-	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
 	LD	A, SIO_CMD_ERROR_RST
-	OUT (1Bh), A
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	OUT	(SIO_B_CMD), A
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-SIO_A_TX_EMPTY:
+INT_SIO_A_TX_EMPTY:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-SIO_A_STATUS_CHANGE:
+INT_SIO_A_STATUS_CHANGE:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP 	0x8000
 
-SIO_A_RX_AVAILABLE:
+INT_SIO_A_RX_AVAILABLE:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	IN	A, (SIO_A_DATA)		; Echo the character
+	OUT	(SIO_A_DATA), A
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP 	0x8000
 
-SIO_A_ERROR:
+INT_SIO_A_ERROR:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
 	LD	A, SIO_CMD_ERROR_RST
-	OUT (18h), A
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	OUT	(SIO_A_CMD), A
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-CTC_CH1:
+INT_CTC_CH1:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-CTC_CH2:
+INT_CTC_CH2:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-CTC_CH3:
+INT_CTC_CH3:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-CTC_CH4:
+INT_CTC_CH4:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-PIO_A:
+INT_PIO_A:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
-PIO_B:
+INT_PIO_B:
 	DI
-	PUSH AF
-	PUSH BC
-	PUSH DE
-	PUSH HL
-	POP HL
-	POP DE
-	POP BC
-	POP AF
-	JP 0x8000
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	POP	HL
+	POP	DE
+	POP	BC
+	POP	AF
+	JP	0x8000
 
 LCD_SPLASH:
 	DB "****************************************"
