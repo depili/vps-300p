@@ -28,6 +28,7 @@ LCD_FLAG                EQU     0xE800
 LCD_SRC                 EQU     0xE801  ; Source for LCD data in shared memory
 LCD_DEST                EQU     0x1000  ; Local memory copy destination for lcd data
 LCD_BYTES               EQU     0xA0    ; 40 bytes per line, 4 lines = 160 = 0xA0 bytes
+LCD_POINTER             EQU     0x8100  ; Pointer for writing bytes to the LCD_DEST buffer
 LAMP_SRC                EQU     0xEA00  ; Source for lamp data in shared memory
 LAMP_DEST               EQU     0x9500  ; Local memory destination for lamp data
 LAMP_BYTES              EQU     0x1B    ; 27 bytes for lamp data
@@ -117,6 +118,8 @@ MAIN_LOOP: PROC
         LD      DE,LCD_SRC
         LD      BC,LCD_BYTES    ; 160 bytes
         LDIR
+        LD      HL, LCD_DEST
+        LD      (LCD_POINTER), HL       ; Set up a write pointer for the LCD
 
         ; CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
         ; CALL  L5783           ; Goes to the big jump table
@@ -522,6 +525,25 @@ INIT_EI_RETI:
         LD      (8002h),A
         RET
 
+        ; Write A to LCD_POINTER, increment it, resetting if needed
+LCD_WRITE: PROC
+        LD      HL, (LCD_POINTER)
+        LD      (HL), A
+        INC     HL
+        LD      A, H
+        CP      0 + (LCD_DEST + LCD_BYTES - 1) / 0x0100
+        JP      NZ, increment
+        LD      A, L
+        CP      0 + (LCD_DEST + LCD_BYTES - 1) % 0x0100
+        JP      NZ, increment
+        LD      HL, LCD_DEST
+        LD      (LCD_POINTER), HL
+        RET
+increment:
+        INC     HL
+        LD      (LCD_POINTER), HL
+        RET
+ENDP
 
         ; --- L0376 ---
         ; Init both LCD controllers
