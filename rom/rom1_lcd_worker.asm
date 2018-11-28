@@ -198,7 +198,8 @@ byte3:  POP     AF
         CALL    RX_INIT         ; end of message
         RET
 
-err:    CALL    RX_INIT         ; Reset the counter, type and pointer
+err:    POP     AF
+        CALL    RX_INIT         ; Reset the counter, type and pointer
         LD      A, "E"
         OUT     (SIO_A_DATA), A
         RET
