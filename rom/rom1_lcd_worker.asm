@@ -25,11 +25,12 @@ RX_COUNTER		EQU	0x9000
 RX_POINTER		EQU	0x9002
 RX_TYPE			EQU	0x9004	; first byte of the message
 LCD_FLAG		EQU	0xE800
-LCD_DATA		EQU	0xE801
-LCD_LOCAL		EQU	0x1000
-LAMP_SRC		EQU	0xEA00
-LAMP_DEST		EQU	0x9500
-LAMP_BYTES		EQU	0x1A
+LCD_SRC			EQU	0xE801	; Source for LCD data in shared memory
+LCD_DEST		EQU	0x1000	; Local memory copy destination for lcd data
+LCD_BYTES		EQU	0xA0	; 40 bytes per line, 4 lines = 160 = 0xA0 bytes
+LAMP_SRC		EQU	0xEA00	; Source for lamp data in shared memory
+LAMP_DEST		EQU	0x9500	; Local memory destination for lamp data
+LAMP_BYTES		EQU	0x1B	; 27 bytes for lamp data
 
 ORG 0x0
 
@@ -107,8 +108,16 @@ loop2:	DJNZ	loop2
 ENDP
 
 MAIN_LOOP: PROC
-	LD	HL,LCD_SPLASH
+	LD	HL,LCD_SPLASH	; Load the splash screen to the LCD
 	CALL	LCD_UPDATE
+
+	LD	A, 0x01		; Initialize the LCD work ram
+	LD	(LCD_FLAG), A
+	LD	HL,LCD_SPLASH
+	LD	DE,LCD_SRC
+	LD	BC,LCD_BYTES	; 160 bytes
+	LDIR
+
 	; CALL	LAMP_COPY	; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
 	; CALL	L5783		; Goes to the big jump table
 	; CALL	L00E5		; Send ping request, zero memory flags
@@ -178,7 +187,7 @@ byte1:	POP	AF		; Restore the message
 	JP	return
 
 byte2:	POP	AF
-	CP	LAMP_BYTES	; Assume this is a lamp byte set message
+	CP	LAMP_BYTES-1	; Assume this is a lamp byte set message
 	JP	C, err		; erroneus byte address
 	JP	return
 
@@ -217,9 +226,9 @@ LAMP_MSG: PROC
 ENDP
 
 	; --- L5783 ---
-	; Shifts out 0x1B bytes to the various lamps
+	; Shifts out LAMP_BYTES bytes to the various lamps
 LAMP_UPDATE: PROC
-	LD	HL,LAMP_DEST + 0x1A
+	LD	HL,LAMP_DEST + LAMP_BYTES - 1
 	LD	B,1Bh
 loop:	LD	A,(HL)
 	OUT	(01h),A
@@ -242,7 +251,7 @@ ENDP
 LAMP_COPY:
 	LD	HL,LAMP_SRC
 	LD	DE,LAMP_DEST
-	LD	BC,001Bh
+	LD	BC,LAMP_BYTES
 	LDIR
 	RET
 
@@ -752,7 +761,7 @@ ENDP
 
 	; Check LCD_FLAG location for non-zero value
 	; If so zero it and copy the new LCD data down
-	; to LCD_LOCAL and update the LCD
+	; to LCD_DEST and update the LCD
 LCD_COPY: PROC
 	LD	HL, LCD_FLAG
 	LD	A,(HL)
@@ -760,11 +769,11 @@ LCD_COPY: PROC
 	JR	Z, return
 	LD	A, 0x00
 	LD	(HL), A
-	LD	HL,LCD_DATA
-	LD	DE,LCD_LOCAL
-	LD	BC,0xA0		; 160 bytes
+	LD	HL,LCD_SRC
+	LD	DE,LCD_DEST
+	LD	BC,LCD_BYTES	; 160 bytes
 	LDIR
-	LD	HL,LCD_LOCAL
+	LD	HL,LCD_DEST
 	CALL	LCD_UPDATE
 return:	RET
 ENDP
