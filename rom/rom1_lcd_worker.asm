@@ -22,8 +22,8 @@ PIO_B_CMD		EQU	0x1F
 
 ; Memory
 RX_COUNTER		EQU	0x9000
-RX_TYPE			EQU	0x9001
-RX_POINTER		EQU	0x9002
+RX_POINTER		EQU	0x9001
+RX_TYPE			EQU	0x9002	; first byte of the message
 LCD_FLAG		EQU	0xE800
 LCD_DATA		EQU	0xE801
 LCD_LOCAL		EQU	0x1000
@@ -155,50 +155,53 @@ RX_INIT:
 	LD	A, 0x00		; Error in message, zero the counter and type
 	LD	(RX_COUNTER), A
 	LD	(RX_TYPE), A
-	LD	HL, RX_POINTER
-	LD	(HL), RX_POINTER+1
+	LD	IX, RX_POINTER
+	LD	HL, RX_POINTER+1
+	LD	(IX), L
+	LD	(IX+1), H
 	RET
 
 	; Process the byte in A
 SERIAL_RX_CMD: PROC
-	PUSH	A
+	PUSH	AF
 	LD	A, (HL)
 	AND	A
-	JP	Z, byte1:
+	JP	Z, byte1
 	CP	0x01		; Message type parsing should go in here eventually
-	JP	Z, byte2:
+	JP	Z, byte2
 	CP	0x02
-	JP	Z, byte3:
-	JP	error		; Only 3 bytes in the supported message
+	JP	Z, byte3
+	JP	err		; Only 3 bytes in the supported message
 
-byte1:	POP	A		; Restore the message
+byte1:	POP	AF		; Restore the message
 	BIT	7, A		; First byte of a message has bit 7 set
-	JP	Z, error
+	JP	Z, err
 	LD	(RX_TYPE), A	; Store message type
 	JP	return
 
-byte2:	POP	A
+byte2:	POP	AF
 	CP	LAMP_BYTES	; Assume this is a lamp byte set message
-	JP	C, error	; erroneus byte address
+	JP	C, err		; erroneus byte address
 	JP	return
 
-byte3:	POP	A
+byte3:	POP	AF
 	LD	A, "P"
 	OUT	(SIO_A_DATA), A
 	CALL	LAMP_MSG	; process the lamp message
 	CALL	RX_INIT		; end of message
 	RET
 
-error:	CALL	RX_INIT		; Reset the counter, type and pointer
+err:	CALL	RX_INIT		; Reset the counter, type and pointer
 	LD	A, "E"
 	OUT	(SIO_A_DATA), A
 	RET
 
 return:	LD	(RX_POINTER), A
-	INC	RX_POINTER
-	INC	RX_COUNTER
+	LD	IX, RX_COUNTER
+	INC	(IX)
+	INC	(IX+1)
 	LD	A, (RX_COUNTER)	; Send the current RX counter to SIO A
-	ADD	0x30		; ascii "0"
+	ADD	A, 0x30		; ascii "0"
 	OUT	(SIO_A_DATA), A
 	RET
 ENDP
@@ -208,10 +211,10 @@ LAMP_MSG: PROC
 	LD	IX, RX_POINTER+1
 	LD	HL, LAMP_DEST
 	LD	A, L			; Add byte offset from the message
-	ADD	(IX+1)
+	ADD	A, (IX+1)
 	LD	L, A
-	LD	DE, (IX+2)
-	LD	(HL), DE		; Load the byte from message in place
+	LD	A, (IX+2)
+	LD	(HL), A			; Load the byte from message in place
 	RET
 ENDP
 
