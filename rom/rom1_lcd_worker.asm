@@ -24,6 +24,7 @@ PIO_B_CMD               EQU     0x1F
 RX_COUNTER              EQU     0x9000
 RX_POINTER              EQU     0x9002
 RX_TYPE                 EQU     0x9004  ; first byte of the message
+RX_MAX_BYTES            EQU     0x04
 LCD_FLAG                EQU     0xE800
 LCD_SRC                 EQU     0xE801  ; Source for LCD data in shared memory
 LCD_DEST                EQU     0x1000  ; Local memory copy destination for lcd data
@@ -158,9 +159,12 @@ loopend:
         ; CALL    LCD_COPY        ; Update LCD from shared memory
         ; IN A, (00h)             ; Wiggle some CS lines
         ; IN A, (02h)
-        LD A, "-"
-        CALL SIO_A_TX_BLOCKING
-
+        ; LD A, "-"
+        ; CALL SIO_A_TX_BLOCKING
+        DI
+        CALL    CHECK_RX
+        EI
+        CALL    LAMP_UPDATE
         JP      loop
 ENDP
 
@@ -193,10 +197,51 @@ RX_INIT:
         LD      (RX_POINTER), HL
         RET
 
+        ; Check the RX buffer
+CHECK_RX: PROC
+        LD      A, (RX_COUNTER)
+        CP      RX_MAX_BYTES + 0x01
+        JR      NC, err  ; Too many bytes
+        AND     A
+        JR      NZ, check_msg
+        RET
+err:    CALL RX_INIT
+        LD A, "E"
+        CALL SIO_A_TX_BLOCKING
+        RET
+check_msg:
+        LD      A, (RX_TYPE)
+        CP      0x80            ; Lamp message
+        JR      Z, lamp
+        JR      err             ; Invalid message
+lamp:
+        LD A, "L"
+        CALL SIO_A_TX_BLOCKING
+        LD      A, (RX_COUNTER)
+        CP      0x03
+        JR      NZ, return      ; not enough bytes for full message
+        LD      IX, RX_TYPE     ; first byte of message
+        LD      A, (IX+0x01)    ; Byte offset of the lamp data
+        OUT     (SIO_A_DATA), A
+        CP      LAMP_BYTES
+        JP      NC, err         ; Too big offset
+        LD      BC, 0x0000
+        LD      C, A
+        LD      HL, LAMP_DEST
+        ADD     HL, BC
+        LD      A, (IX+0x02)
+        LD      (HL), A
+        LD      A, "O"
+        CALL    SIO_A_TX_BLOCKING
+        CALL    RX_INIT
+return: RET
+ENDP
+
         ; Process the byte in A
+        ; Confirmed not working...
 SERIAL_RX_CMD: PROC
         PUSH    AF
-        LD      A, (HL)
+        LD      A, (RX_COUNTER)
         AND     A
         JP      Z, byte1
         CP      0x01            ; Message type parsing should go in here eventually
@@ -250,6 +295,7 @@ LAMP_MSG: PROC
         ADD     HL, BC
         LD      A, (IX+2)
         LD      (HL), A                 ; Load the byte from message in place
+        CALL    LAMP_UPDATE
         RET
 ENDP
 
@@ -872,13 +918,37 @@ INT_SIO_A_STATUS_CHANGE:
         POP     AF
         JP      0x8000
 
-INT_SIO_A_RX_AVAILABLE:
+INT_SIO_A_RX_AVAILABLE: PROC
         DI
         PUSH    AF
-        IN      A, (SIO_A_DATA)         ; Echo the character
-        OUT     (SIO_A_DATA), A
+        PUSH    BC
+        PUSH    DE
+        PUSH    HL
+        IN      A, (SIO_A_DATA)         ; Read the character
+        PUSH    AF
+        LD      A, (RX_COUNTER)
+        AND     A
+        JR      Z, first_byte           ; Seek for the start byte
+        POP     AF
+store:  LD      HL, (RX_POINTER)
+        LD      (HL), A
+        INC     HL
+        LD      (RX_POINTER), HL
+        LD      HL, RX_COUNTER
+        INC     (HL)
+        LD      A, (HL)
+        OUT     (SIO_A_DATA), A         ; Send the RX count
+return: POP     HL
+        POP     DE
+        POP     BC
         POP     AF
         JP      0x8000
+first_byte:
+        POP     AF
+        BIT     7, A
+        JR      NZ, store               ; Valid first byte
+        JR      return
+ENDP
 
 INT_SIO_A_ERROR:
         DI
