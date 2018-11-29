@@ -41,9 +41,20 @@ START:
         LD      A,INTERRUPT_VECTORS / 0x0100
         LD      I,A
         LD      SP,0E7FFh       ; Stack pointer
-        ; CALL  INIT1           ; Sets up IO F4, F0 and F1, has a big delay in the end
+        CALL    INIT1           ; Sets up IO F4, F0 and F1, has a big delay in the end
         JR      INIT2
+
         ; This region had what looks like a second start for the CPU?
+        SEEK    0x000F
+        ORG     0x000F
+START2:
+        DI
+        IM      2
+        LD      A,INTERRUPT_VECTORS / 0x0100
+        LD      I,A
+        LD      SP,0E7FFh       ; Stack pointer
+        CALL    INIT1           ; Sets up IO F4, F0 and F1, has a big delay in the end
+        JR      INIT2
 
         ; -- L0019 --
 INIT2:
@@ -51,10 +62,10 @@ INIT2:
         CALL    INIT_CTC
         CALL    INIT_SIO
         CALL    INIT_PIO
-        ; CALL  INIT_4B ; Unknown, possibly unpopulated IO?
+        CALL    INIT_4B ; Unknown, possibly unpopulated IO?
         CALL    SHARED_MEM_INIT
-        ; CALL  INIT_44_45
-        ; CALL  INIT_48_49
+        CALL    INIT_44_45
+        CALL    INIT_48_49
         CALL    LCD_INIT
         ; CALL  L03F7 ; Zeroes 9416h, not ported
         ; CALL  L0466 ; Sets 8003h - 8008h memory up
@@ -65,7 +76,6 @@ INIT2:
         ; LD    (9311h),A
         ; LD    HL,0FFFFh       ; address or value?
         ; LD    (890Ch),HL
-        EI
         LD      A, "X"
         OUT     (SIO_A_DATA), A
         JP      MAIN_LOOP
@@ -109,8 +119,14 @@ loop2:  DJNZ    loop2
 ENDP
 
 MAIN_LOOP: PROC
+        CALL LAMP_UPDATE
+
         LD      HL,LCD_SPLASH   ; Load the splash screen to the LCD
         CALL    LCD_UPDATE
+
+        EI
+        LD      A, "L"
+        OUT     (SIO_A_DATA), A
 
         LD      A, 0x01         ; Initialize the LCD work ram
         LD      (LCD_FLAG), A
@@ -125,6 +141,9 @@ MAIN_LOOP: PROC
         ; CALL  L5783           ; Goes to the big jump table
         ; CALL  L00E5           ; Send ping request, zero memory flags
         CALL    RX_INIT         ; Initialise receive counter, type, pointer
+        LD A, "M"
+        CALL SIO_A_TX_BLOCKING
+
 loop:   ; LD    A,(9417h)       ; Check flag 9417h, if not zero zero it and execute
         ; AND   A
         ; JR    Z,loopend
@@ -132,19 +151,21 @@ loop:   ; LD    A,(9417h)       ; Check flag 9417h, if not zero zero it and exec
         ; LD    (9417h),A
         ; CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
         ; CALL  L05D3           ; Goes to the big jump table
-        CALL    LAMP_UPDATE     ; Output 1Ah bytes from LAMP_DEST + 0x1A down to ports 00h - 03h
+        ; CALL    LAMP_UPDATE     ; Output 1Ah bytes from LAMP_DEST + 0x1A down to ports 00h - 03h
         ; CALL  L0409           ; Conditionally sends PING request
 loopend:
         ; CALL  L57BB           ; Huge conditional tree
-        CALL    LCD_COPY        ; Update LCD from shared memory
+        ; CALL    LCD_COPY        ; Update LCD from shared memory
+        ; IN A, (00h)             ; Wiggle some CS lines
+        ; IN A, (02h)
         LD A, "-"
         CALL SIO_A_TX_BLOCKING
-        IN A, (00h)             ; Wiggle some CS lines
-        IN A, (02h)
+
         JP      loop
 ENDP
 
         ; Waits for TX buffer to be empty, then sends A
+        ; Verfied working
 SIO_A_TX_BLOCKING: PROC
         LD      D, A
         CALL    SIO_A_TX_CHECK
@@ -154,6 +175,7 @@ SIO_A_TX_BLOCKING: PROC
 ENDP
 
         ; Wait until SIO A TX buffer is empty
+        ; Verified working
 SIO_A_TX_CHECK: PROC
         LD      A, 0x01         ; Select register 1
         OUT     (SIO_A_CMD), A
@@ -233,6 +255,7 @@ ENDP
 
         ; --- L5783 ---
         ; Shifts out LAMP_BYTES bytes to the various lamps
+        ; Verified working
 LAMP_UPDATE: PROC
         LD      HL,LAMP_DEST + LAMP_BYTES - 1
         LD      B,1Bh
@@ -388,6 +411,11 @@ loop:   DEC     HL
         LD      A,(HL)
         LD      HL,0E800h
         LD      A,(HL)
+        LD      HL,LAMP_DEST
+        LD      DE,LAMP_DEST+1
+        LD      (HL), 0x00
+        LD      BC, LAMP_BYTES
+        LDIR
         RET
 ENDP
 
@@ -452,7 +480,7 @@ SIO_A_INIT_DATA:
         DB      0EAh    ; TX crc disable, RTS low, TX enable, DTR low, external sync
         DB      10h     ; CMD reset status interrupts
         DB      01h     ; Write register 1
-        DB      12h     ; Transmit interrupt enable, receive interrupt on all characters
+        DB      10h     ; Transmit interrupt enable, receive interrupt on all characters
 SIO_B_INIT_DATA:
         DB      00h     ; Write register 0
         DB      00h
@@ -469,7 +497,7 @@ SIO_B_INIT_DATA:
         ; DB    70h
         DB      10h     ; CMD reset status interrupts
         DB      01h     ; Write register 1
-        DB      16h     ; Transmit interrupt enable, receive interrupt on all characters, status affects vector
+        DB      14h     ; Transmit interrupt enable, receive interrupt on all characters, status affects vector
 
 
         ; --- L0194 ---
@@ -494,13 +522,13 @@ INIT_CTC:
 
 CTC_1_DATA:
         DB      CTC_VECTORS % 0x0100    ; Interrupt vector location
-        DB      0DDh    ; Interrupt enabled, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
+        DB      05Dh    ; Interrupt enabled, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
         DB      0Ch     ; Time constant
 CTC_2_DATA:
         DB      5Dh     ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
         DB      01h     ; Time constant
 CTC_3_DATA:
-        DB      0A7h    ; Interrupt enabled, timer, prescaler 16, falling edge, time constant follow, software reset
+        DB      027h    ; Interrupt enabled, timer, prescaler 16, falling edge, time constant follow, software reset
         DB      0A3h    ; Time constant
 CTC_4_DATA:
         DB      5Dh     ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
@@ -635,6 +663,7 @@ LCD2_REGISTER:
         RET
 
         ; Reads 160 bytes starting from HL and writes to the LCD
+        ; Verified as working
 LCD_UPDATE: PROC
         LD      A,00h
         CALL    SET_LCD1_ADDR
@@ -806,177 +835,83 @@ ENDP
         ; -- INTERRUPT HANDLERS --
 INT_SIO_B_TX_EMPTY:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
         JP      0x8000
 
 INT_SIO_B_STATUS_CHANGE:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
-        JP 0x8000
+        JP      0x8000
 
 INT_SIO_B_RX_AVAILABLE:
         DI
         PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
         IN      A, (SIO_B_DATA)
-        POP     HL
-        POP     DE
-        POP     BC
         POP     AF
         JP 0x8000
 
 INT_SIO_B_ERROR:
         DI
         PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
         LD      A, SIO_CMD_ERROR_RST
         OUT     (SIO_B_CMD), A
-        POP     HL
-        POP     DE
-        POP     BC
         POP     AF
         JP      0x8000
 
 INT_SIO_A_TX_EMPTY:
         DI
         PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
+        LD      A, "T"
+        OUT     (SIO_A_DATA), A
         POP     AF
         JP      0x8000
 
 INT_SIO_A_STATUS_CHANGE:
         DI
         PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
+        LD      A, "S"
+        OUT     (SIO_A_DATA), A
         POP     AF
         JP      0x8000
 
 INT_SIO_A_RX_AVAILABLE:
         DI
         PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
         IN      A, (SIO_A_DATA)         ; Echo the character
         OUT     (SIO_A_DATA), A
-        POP     HL
-        POP     DE
-        POP     BC
         POP     AF
         JP      0x8000
 
 INT_SIO_A_ERROR:
         DI
         PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
+        LD      A, "E"
+        OUT     (SIO_A_DATA), A
         LD      A, SIO_CMD_ERROR_RST
         OUT     (SIO_A_CMD), A
-        POP     HL
-        POP     DE
-        POP     BC
         POP     AF
         JP      0x8000
 
 INT_CTC_CH1:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
         JP      0x8000
 
 INT_CTC_CH2:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
         JP      0x8000
 
 INT_CTC_CH3:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
         JP      0x8000
 
 INT_CTC_CH4:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
         JP      0x8000
 
 INT_PIO_A:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
         JP      0x8000
 
 INT_PIO_B:
         DI
-        PUSH    AF
-        PUSH    BC
-        PUSH    DE
-        PUSH    HL
-        POP     HL
-        POP     DE
-        POP     BC
-        POP     AF
         JP      0x8000
 
 LCD_SPLASH:
