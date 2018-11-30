@@ -13,3 +13,8 @@ MCOPY(src,dest,len) MACRO
         LD BC, len
         LDIR
 ENDM
+
+TX_A(data) MACRO
+        LD      A, data
+        CALL    SIO_A_TX_BLOCKING
+ENDM

@@ -32,15 +32,7 @@ INIT2:
         ; CALL    INIT_44_45
         ; CALL    INIT_48_49
         CALL    LCD_INIT
-        ; CALL  L03F7 ; Zeroes 9416h, not ported
-        ; CALL  L0466 ; Sets 8003h - 8008h memory up
-        ; CALL  L0486 ; Sets up 920Dh - 9212h
-        ; CALL  L0494 ; Sets up 930Dh - 9312h
-        ; CALL  L0476 ; Sets up 8908h - 890Eh
-        ; LD    A,0FFh
-        ; LD    (9311h),A
-        ; LD    HL,0FFFFh       ; address or value?
-        ; LD    (890Ch),HL
+
         LD      A, "X"
         OUT     (SIO_A_DATA), A
         JP      MAIN_LOOP
@@ -90,25 +82,18 @@ MAIN_LOOP: PROC
 
         LD      HL,LCD_SPLASH   ; Load the splash screen to the LCD
         CALL    LCD_UPDATE
-
         EI
-        LD      A, "L"
-        OUT     (SIO_A_DATA), A
+        TX_A    "L"
 
-        LD      A, 0x01         ; Initialize the LCD work ram
+        LD      A, 0x01                 ; Initialize the LCD work ram
         LD      (LCD_FLAG), A
         MCOPY   LCD_SPLASH,LCD_SRC,LCD_BYTES
-        LDIR
-
         LD      HL, LCD_DEST
         LD      (LCD_POINTER), HL       ; Set up a write pointer for the LCD
 
         ; CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
-        ; CALL  L5783           ; Goes to the big jump table
-        ; CALL  L00E5           ; Send ping request, zero memory flags
         CALL    RX_INIT         ; Initialise receive counter, type, pointer
-        LD A, "M"
-        CALL SIO_A_TX_BLOCKING
+        TX_A    "M"
 
 loop:   ; CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
         ; CALL  LCD_COPY        ; Update LCD from shared memory
