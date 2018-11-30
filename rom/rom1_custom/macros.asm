@@ -7,6 +7,7 @@ ZFILL(ptr,len) MACRO
         LDIR
 ENDM
 
+; Memory copy
 MCOPY(src,dest,len) MACRO
         LD HL,src
         LD DE,dest
@@ -14,7 +15,17 @@ MCOPY(src,dest,len) MACRO
         LDIR
 ENDM
 
+; Send (blocking) data with SIO port A
 TX_A(data) MACRO
         LD      A, data
         CALL    SIO_A_TX_BLOCKING
+ENDM
+
+CP_HL_C(value, jump) MACRO
+        LD      A, H
+        CP      value / 0x0100
+        JP      C, jump
+        LD      A, L
+        CP      value % 0x0100
+        JP      C, jump
 ENDM
