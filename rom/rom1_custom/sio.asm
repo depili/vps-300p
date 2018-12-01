@@ -35,21 +35,23 @@ CHECK_RX: PROC
         AND     A
         JR      NZ, check_msg
         RET
-err:    CALL    RX_INIT
-        LD      A, "E"
-        CALL    SIO_A_TX_BLOCKING
+err:    CALL RX_INIT
+        LD A, "E"
+        CALL SIO_A_TX_BLOCKING
         RET
 check_msg:
         LD      A, (RX_TYPE)
         CP      0x80            ; Lamp message
         JR      Z, lamp
+        CP      0x81            ; LCD message
+        JP      Z, lcd
         JR      err             ; Invalid message
-lamp:                           ; Process a lamp message
-        LD      A, "L"
-        CALL    SIO_A_TX_BLOCKING
+lamp:
+        LD A, "L"
+        CALL SIO_A_TX_BLOCKING
         LD      A, (RX_COUNTER)
         CP      0x03
-        JR      NZ, return      ; not enough bytes for full message
+        JR      C, return      ; not enough bytes for full message
         LD      IX, RX_TYPE     ; first byte of message
         LD      A, (IX+0x01)    ; Byte offset of the lamp data
         OUT     (SIO_A_DATA), A
@@ -61,9 +63,17 @@ lamp:                           ; Process a lamp message
         ADD     HL, BC
         LD      A, (IX+0x02)
         LD      (HL), A
-        CALL    LAMP_UPDATE     ; Update the lamps
         LD      A, "O"
         CALL    SIO_A_TX_BLOCKING
+        CALL    RX_INIT
+        RET
+lcd:
+        TX_A    "D"
+        LD      A, (RX_COUNTER)
+        CP      0x02
+        JP      C, return
+        LD      A, (RX_TYPE+1)
+        CALL    LCD_WRITE
         CALL    RX_INIT
 return: RET
 ENDP

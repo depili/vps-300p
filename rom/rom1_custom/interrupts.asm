@@ -45,6 +45,7 @@ INT_SIO_A_RX_AVAILABLE: PROC
         PUSH    DE
         PUSH    HL
         IN      A, (SIO_A_DATA)         ; Read the character
+        OUT     (SIO_A_DATA), A
         PUSH    AF
         LD      A, (RX_COUNTER)
         AND     A

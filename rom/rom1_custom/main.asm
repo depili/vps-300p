@@ -90,20 +90,45 @@ MAIN_LOOP: PROC
         MCOPY   LCD_SPLASH,LCD_SRC,LCD_BYTES
         LD      HL, LCD_DEST
         LD      (LCD_POINTER), HL       ; Set up a write pointer for the LCD
-
+        CALL    LCD_COPY
         ; CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
         CALL    RX_INIT         ; Initialise receive counter, type, pointer
         TX_A    "M"
+
+        LD      A, "H"
+        CALL    LCD_WRITE
+        LD      A, "e"
+        CALL    LCD_WRITE
+        LD      A, "l"
+        CALL    LCD_WRITE
+        LD      A, "l"
+        CALL    LCD_WRITE
+        LD      A, "o"
+        CALL    LCD_WRITE
+        LD      A, " "
+        CALL    LCD_WRITE
+        LD      A, "w"
+        CALL    LCD_WRITE
+        LD      A, "o"
+        CALL    LCD_WRITE
+        LD      A, "l"
+        CALL    LCD_WRITE
+        LD      A, "d"
+        CALL    LCD_WRITE
+        LD      HL, LCD_DEST
+        CALL    LCD_UPDATE
 
 loop:   ; CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
         ; CALL  LCD_COPY        ; Update LCD from shared memory
         ; IN A, (00h)           ; Wiggle some CS lines
         ; IN A, (02h)
-        ; LD A, "-"
-        ; CALL SIO_A_TX_BLOCKING
+        ; TX_A    "-"
         DI
         CALL    CHECK_RX
         EI
+        LD      HL, LCD_DEST
+        CALL    LCD_UPDATE
+
         CALL    LAMP_UPDATE
         JP      loop
 ENDP
