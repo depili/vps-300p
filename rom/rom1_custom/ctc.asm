@@ -26,7 +26,7 @@ CTC_2_DATA:
         DB      5Dh     ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
         DB      01h     ; Time constant
 CTC_3_DATA:
-        DB      027h    ; Interrupt enabled, timer, prescaler 16, falling edge, time constant follow, software reset
+        DB      027h    ; No Interrupt, timer, prescaler 16, falling edge, time constant follow, software reset
         DB      0A3h    ; Time constant
 CTC_4_DATA:
         DB      5Dh     ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
