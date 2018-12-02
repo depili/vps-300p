@@ -3,13 +3,15 @@ LCD_WRITE: PROC
         LD      HL, (LCD_POINTER)
         LD      (HL), A
         INC     HL
+        LD      A, 0x01
+        LD      (LCD_FLAG), A
         LD      A, H
-        CP      0 + (LCD_DEST + LCD_BYTES) / 0x0100
+        CP      0 + (LCD_SRC + LCD_BYTES) / 0x0100
         JP      NZ, no_reset
         LD      A, L
-        CP      0 + (LCD_DEST + LCD_BYTES) % 0x0100
+        CP      0 + (LCD_SRC + LCD_BYTES) % 0x0100
         JP      NZ, no_reset
-        LD      HL, LCD_DEST
+        LD      HL, LCD_SRC
         LD      (LCD_POINTER), HL
         RET
 no_reset:
