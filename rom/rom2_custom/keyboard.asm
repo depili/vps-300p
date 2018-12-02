@@ -107,6 +107,146 @@ KEYB_WRITE_2:
 	; LDIR
 	RET
 
+        ; Assumed "PWM" lamp brightness settings
+        ; Set bit 5 to 0000 0000
+	; --- START PROC L3E07 ---
+KEYB_2_PWM_5_0:
+	LD	IY,KEYB_2_DISP
+	RES	5,(IY+00h)      ; 0
+	RES	5,(IY+01h)      ; 0
+	RES	5,(IY+02h)      ; 0
+	RES	5,(IY+03h)      ; 0
+	RES	5,(IY+04h)      ; 0
+	RES	5,(IY+05h)      ; 0
+	RES	5,(IY+06h)      ; 0
+	RES	5,(IY+07h)      ; 0
+	RET
+
+	; Set bit 5 to 1100 0001
+	; --- START PROC L3E2C ---
+KEYB_2_PWM_5_1:
+	LD	IY,KEYB_2_DISP
+	SET	5,(IY+00h)      ; 1
+	SET	5,(IY+01h)      ; 1
+	RES	5,(IY+02h)      ; 0
+	RES	5,(IY+03h)      ; 0
+	RES	5,(IY+04h)      ; 0
+	RES	5,(IY+05h)      ; 0
+	RES	5,(IY+06h)      ; 0
+	SET	5,(IY+07h)      ; 1
+	RET
+
+	; Set bit 4 to 0000 0000
+	; --- START PROC L3E51 ---
+KEYB_2_PWM_4_0:
+	LD	IY,KEYB_2_DISP
+	RES	4,(IY+00h)      ; 0
+	RES	4,(IY+01h)      ; 0
+	RES	4,(IY+02h)      ; 0
+	RES	4,(IY+03h)      ; 0
+	RES	4,(IY+04h)      ; 0
+	RES	4,(IY+05h)      ; 0
+	RES	4,(IY+06h)      ; 0
+	RES	4,(IY+07h)      ; 0
+	RET
+
+	; Set bit 4 to 1100 0001
+	; --- START PROC L3E76 ---
+KEYB_2_PWM_4_1:
+	LD	IY,KEYB_2_DISP
+	SET	4,(IY+00h)      ; 1
+	SET	4,(IY+01h)      ; 1
+	RES	4,(IY+02h)      ; 0
+	RES	4,(IY+03h)      ; 0
+	RES	4,(IY+04h)      ; 0
+	RES	4,(IY+05h)      ; 0
+	RES	4,(IY+06h)      ; 0
+	SET	4,(IY+07h)      ; 1
+	RET
+
+	; Set bit 3 to 0000 0000
+	; --- START PROC L3E9B ---
+KEYB_2_PWM_3_0:
+	LD	IX,KEYB_2_DISP
+	RES	3,(IX+00h)      ; 0
+	RES	3,(IX+01h)      ; 0
+	RES	3,(IX+02h)      ; 0
+	RES	3,(IX+03h)      ; 0
+	RES	3,(IX+04h)      ; 0
+	RES	3,(IX+05h)      ; 0
+	RES	3,(IX+06h)      ; 0
+	RES	3,(IX+07h)      ; 0
+	RET
+
+	; Set bit 3 to 1100 0001
+	; --- START PROC L3EC0 ---
+KEYB_2_PWM_3_1:
+	LD	IX,KEYB_2_DISP
+	SET	3,(IX+00h)      ; 1
+	SET	3,(IX+01h)      ; 1
+	RES	3,(IX+02h)      ; 0
+	RES	3,(IX+03h)      ; 0
+	RES	3,(IX+04h)      ; 0
+	RES	3,(IX+05h)      ; 0
+	RES	3,(IX+06h)      ; 0
+	SET	3,(IX+07h)      ; 1
+	RET
+
+	; Set bit 2 to 0000 0000
+	; --- START PROC L3EE5 ---
+KEYB_2_PWM_2_0:
+	LD	IX,KEYB_2_DISP
+	RES	2,(IX+00h)      ; 0
+	RES	2,(IX+01h)      ; 0
+	RES	2,(IX+02h)      ; 0
+	RES	2,(IX+03h)      ; 0
+	RES	2,(IX+04h)      ; 0
+	RES	2,(IX+05h)      ; 0
+	RES	2,(IX+06h)      ; 0
+	RES	2,(IX+07h)      ; 0
+	RET
+
+	; Set bit 2 to 1100 0001
+	; --- START PROC L3F0A ---
+KEYB_2_PWM_2_1:
+	LD	IX,KEYB_2_DISP
+	SET	2,(IX+00h)      ; 1
+	SET	2,(IX+01h)      ; 1
+	RES	2,(IX+02h)      ; 0
+	RES	2,(IX+03h)      ; 0
+	RES	2,(IX+04h)      ; 0
+	RES	2,(IX+05h)      ; 0
+	RES	2,(IX+06h)      ; 0
+	SET	2,(IX+07h)      ; 1
+	RET
+
+	; Set bit 1 to 0000 0000
+	; --- START PROC L3F2F ---
+KEYB_2_PWM_1_0:
+	LD	IX,KEYB_2_DISP
+	RES	1,(IX+00h)
+	RES	1,(IX+01h)
+	RES	1,(IX+02h)
+	RES	1,(IX+03h)
+	RES	1,(IX+04h)
+	RES	1,(IX+05h)
+	RES	1,(IX+06h)
+	RES	1,(IX+07h)
+	RET
+
+	; Set bit 1 to 1100 0001
+	; --- START PROC L3F54 ---
+KEYB_2_PWM_1_1:
+	LD	IX,KEYB_2_DISP
+	SET	1,(IX+00h)
+	SET	1,(IX+01h)
+	RES	1,(IX+02h)
+	RES	1,(IX+03h)
+	RES	1,(IX+04h)
+	RES	1,(IX+05h)
+	RES	1,(IX+06h)
+	SET	1,(IX+07h)
+	RET
 
 	; --- START PROC L039A ---
 KEYB_DELAY: PROC
