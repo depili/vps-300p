@@ -27,10 +27,10 @@ INIT2:
         CALL    INIT_CTC
         CALL    INIT_SIO
         CALL    INIT_PIO
-        ; CALL    INIT_4B ; Unknown, possibly unpopulated IO?
+        CALL    INIT_4B ; Unknown, possibly unpopulated IO?
         CALL    SHARED_MEM_INIT ; Possibly not needed, just reads and then discards stuff from memory
-        ; CALL    INIT_44_45
-        ; CALL    INIT_48_49
+        CALL    INIT_44_45
+        CALL    INIT_48_49
         CALL    LCD_INIT
 
         LD      A, "X"
@@ -78,7 +78,7 @@ ENDP
 MAIN_LOOP: PROC
         ZFILL   LAMP_DEST, LAMP_BYTES
         ZFILL   LAMP_SRC, LAMP_BYTES
-        CALL LAMP_UPDATE        ; Turn all lamps off
+        CALL    LAMP_UPDATE        ; Turn all lamps off
 
         LD      HL,LCD_SPLASH   ; Load the splash screen to the LCD
         CALL    LCD_UPDATE
@@ -88,7 +88,7 @@ MAIN_LOOP: PROC
         LD      A, 0x01                 ; Initialize the LCD work ram
         LD      (LCD_FLAG), A
         MCOPY   LCD_SPLASH,LCD_SRC,LCD_BYTES
-        LD      HL, LCD_DEST
+        LD      HL, LCD_WRITE_DEST
         LD      (LCD_POINTER), HL       ; Set up a write pointer for the LCD
         CALL    LCD_COPY
         ; CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
@@ -117,18 +117,26 @@ MAIN_LOOP: PROC
         CALL    LCD_WRITE
         LD      A, "d"
         CALL    LCD_WRITE
+        LD      A, 0x00
+        LD      (MAIN_COUNTER), A
 
-loop:   CALL  LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
+loop:   CALL    LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
         CALL    LAMP_UPDATE
-        CALL  LCD_COPY        ; Update LCD from shared memory
+        ; CALL    LCD_COPY        ; Update LCD from shared memory
+        LD      HL, LCD_DEST
+        CALL    LCD_UPDATE
         ; IN A, (00h)           ; Wiggle some CS lines
         ; IN A, (02h)
-        ; TX_A    "-"
         DI
         CALL    CHECK_RX
         EI
-
-        JP      loop
+        LD      A, (MAIN_COUNTER)
+        INC     A
+        LD      (MAIN_COUNTER), A
+        AND     A
+        JR      NZ, loop
+        TX_A    "-"
+        JR      loop
 ENDP
 
         ; --- L0304 ---

@@ -27,8 +27,94 @@ RX_INIT:
         LD      (RX_POINTER), HL
         RET
 
-        ; Check the RX buffer
+; Check the RX buffer
 CHECK_RX: PROC
+        LD      IX, RX_TYPE     ; Start of the buffer
+        LD      IY, 0x0000      ; Total bytes consumed
+process:
+        LD      A, (RX_COUNTER)
+        LD      C, 0x01         ; Default consume 1 byte
+        AND     A
+        JR      NZ, check_msg
+        RET                     ; No bytes in buffer
+check_msg:
+        LD      A, (IX)
+        CP      0x80            ; Lamp message
+        JR      Z, lamp
+        CP      0x81            ; LCD message
+        JP      Z, lcd
+        JR      inc_bytes           ; Invalid message
+lamp:
+        LD      A, "L"
+        CALL    SIO_A_TX_BLOCKING
+        LD      A, (RX_COUNTER)
+        CP      0x03
+        JP      C, shift        ; not enough bytes for full message
+
+        LD      A, (IX+0x01)    ; Byte offset of the lamp data
+        CP      LAMP_BYTES
+        JP      NC, inc_bytes   ; Too big offset
+
+        LD      BC, 0x0000
+        LD      C, A
+        LD      HL, LAMP_SRC
+        ADD     HL, BC
+
+        LD      A, (IX+0x02)
+        LD      (HL), A
+        LD      C, 0x03         ; Consume full message
+        JP      inc_bytes
+lcd:
+        LD      A, "D"
+        CALL    SIO_A_TX_BLOCKING
+        LD      A, (RX_COUNTER)
+        CP      0x02
+        JP      C, shift        ; Not enough for full message
+        LD      A, (IX+0x01)
+        CALL    SIO_A_TX_BLOCKING
+        CALL    LCD_WRITE
+        ; CALL    RX_INIT
+        LD      C, 0x02
+        JP      inc_bytes
+inc_bytes:
+        LD      A, "i"
+        CALL    SIO_A_TX_BLOCKING
+        LD      B, 0x00
+        ADD     IX, BC
+        ADD     IY, BC
+
+        LD      A, (RX_COUNTER)         ; Shift out C bytes from the buffer
+        SUB     C
+        LD      (RX_COUNTER), A
+
+        LD      A, (RX_COUNTER)
+        AND     A
+        JP      NZ, process             ; Still bytes to check
+shift:
+        LD      A, "s"
+        CALL    SIO_A_TX_BLOCKING
+        LD      HL, RX_TYPE
+        PUSH    IY
+        POP     BC
+        ADD     HL, BC
+        LD      DE, RX_TYPE
+        LD      A, (RX_COUNTER)
+        AND     A
+        JR      Z, set_pointer          ; Zero bytes to copy
+        LD      C, A
+        LD      B, 0x00
+        LDIR
+set_pointer:
+        LD      HL, RX_TYPE     ; Set the write pointer
+        LD      B, 0x00
+        LD      C, A
+        ADD     HL, BC
+        LD      (RX_POINTER), HL
+        RET
+ENDP
+
+        ; Check the RX buffer
+CHECK_RX_OLD: PROC
         LD      A, (RX_COUNTER)
         CP      RX_MAX_BYTES + 0x01
         JR      NC, err  ; Too many bytes
