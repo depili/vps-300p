@@ -120,7 +120,7 @@ MAIN_LOOP: PROC
         LD      A, 0x00
         LD      (MAIN_COUNTER), A
 
-loop:   CALL    LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
+loop:   ; CALL    LAMP_COPY       ; Copy 1Ah bytes from LAMP_SRC to LAMP_DEST
         CALL    LAMP_UPDATE
         ; CALL    LCD_COPY        ; Update LCD from shared memory
         LD      HL, LCD_DEST

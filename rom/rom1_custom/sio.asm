@@ -57,7 +57,7 @@ lamp:
 
         LD      BC, 0x0000
         LD      C, A
-        LD      HL, LAMP_SRC
+        LD      HL, LAMP_DEST
         ADD     HL, BC
 
         LD      A, (IX+0x02)
