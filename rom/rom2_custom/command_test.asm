@@ -60,7 +60,7 @@ check_msg:
         JR      Z, lamp
         CP      0x81            ; LCD message
         JP      Z, lcd
-        JR      inc_bytes           ; Invalid message
+        JR      inc_bytes     	; Invalid message
 lamp:
         LD      A, "L"
         CALL    OUTCHAR
@@ -72,7 +72,7 @@ lamp:
         CALL    HEXOUT
         POP     AF
         CP      LAMP_BYTES
-        JP      NC, err         ; Too big offset
+        JP      NC, shift         ; Too big offset
         LD      BC, 0x0000
         LD      C, A
         LD      HL, LAMP_DEST
@@ -81,7 +81,6 @@ lamp:
         LD      (HL), A
         LD      A, "O"
         CALL    OUTCHAR
-        ; CALL    RX_INIT
         LD      C, 0x03
         JP      inc_bytes
 lcd:
@@ -93,28 +92,24 @@ lcd:
         LD      A, (IX+0x01)
         CALL    OUTCHAR
         ; CALL    LCD_WRITE
-        ; CALL    RX_INIT
         LD      C, 0x02
         JP      inc_bytes
 inc_bytes:
         LD      A, "i"
         CALL    OUTCHAR
-        ; LD      HL, RX_TYPE
-        ; LD      DE, RX_TYPE
         LD      B, 0x00
         ADD     IX, BC
         ADD     IY, BC
-        ; ADD     HL, BC
-
         LD      A, (RX_COUNTER)         ; Shift out C bytes from the buffer
         SUB     C
         LD      (RX_COUNTER), A
-        ; LDIR
-
         CALL    HEXOUT
         LD      A, (RX_COUNTER)
         AND     A
         JP      NZ, process             ; Still bytes to check
+	LD	HL, RX_TYPE		; Set the pointer to buffer start since there are no more bytes
+	LD	(RX_POINTER), HL
+	RET
 shift:
         LD      A, "s"
         CALL    OUTCHAR
