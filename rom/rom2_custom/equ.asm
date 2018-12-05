@@ -8,6 +8,31 @@ SIO_CMD_TX_IR_RST       EQU     0x28
 SIO_CMD_ERROR_RST       EQU     0x30
 SIO_CMD_RETI            EQU     0x38
 
+; Serial receive
+RX_COUNTER              EQU     0x9000
+RX_POINTER              EQU     0x9002  ; Write pointer
+RX_TYPE                 EQU     0x9004  ; first byte of the message
+RX_MAX_BYTES            EQU     0xFF - 0x06
+
+; Serial transmit, 0xFF byte ring buffer
+TX_COUNTER		EQU	0x9100	; Bytes in the TX buffer
+TX_PTR_WRITE		EQU	0x9102	; Write pointer
+TX_PTR_READ		EQU	0x9104	; Read pointer
+TX_BUFFER_START		EQU	0x9200	; Start of the TX buffer, needs to be 0xXX00 as we use 8 bit compare
+
+; LCD
+LCD_FLAG                EQU     0xF800
+LCD_SRC                 EQU     0xA000  ; Source for LCD data
+LCD_DEST                EQU     0xF801  ; Shared memory copy destination for lcd data
+LCD_BYTES               EQU     0xA0    ; 40 bytes per line, 4 lines = 160 = 0xA0 bytes
+LCD_POINTER             EQU     0x8100  ; Pointer for writing bytes to the LCD_SRC buffer
+LCD_WRITE_DEST          EQU     LCD_DEST
+
+; Lamps
+LAMP_SRC                EQU     0xEA00  ; Source for lamp data in shared memory
+LAMP_DEST               EQU     0x9500  ; Local memory destination for lamp data
+LAMP_BYTES              EQU     0x1B    ; 27 bytes for lamp data
+
 ; Keyboard commands
 KEYB_CMD_END            EQU     0xE0
 KEYB_CMD_WRITE_DISPLAY  EQU     0x90    ; Auto increment from address 0
