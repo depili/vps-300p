@@ -18,10 +18,10 @@ PIO_A_SET_BIT_0:
 	RET
 
 PIO_A_INIT_DATA:
-	DB	0CFh    ; Mode 3
-	DB	80h     ; Pin 7 input, others outputs
-	DB	07h     ; No interrupts
+	DB	0CFh	; Mode 3
+	DB	80h	; Pin 7 input, others outputs
+	DB	07h	; No interrupts
 PIO_B_INIT_DATA:
-	DB	0CFh    ; Mode 3
-	DB	0FFh    ; All pins inputs
-	DB	07h     ; No interrupts
+	DB	0CFh	; Mode 3
+	DB	0FFh	; All pins inputs
+	DB	07h	; No interrupts

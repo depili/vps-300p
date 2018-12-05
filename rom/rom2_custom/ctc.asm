@@ -1,4 +1,4 @@
-        ; --- START PROC L0217 ---
+	; --- START PROC L0217 ---
 INIT_CTC:
 L0217:	LD	HL,CTC_1_DATA
 	LD	C,10h
@@ -19,15 +19,15 @@ L0217:	LD	HL,CTC_1_DATA
 	RET
 
 CTC_1_DATA:
-	DB	CTC_VECTORS % 0x0100     ; Interrupt vector location
-	DB	05Dh    ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset WAS 0DDh
+	DB	CTC_VECTORS % 0x0100	 ; Interrupt vector location
+	DB	05Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset WAS 0DDh
 	DB	0Ch
 CTC_2_DATA:
-	DB	5Dh     ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
+	DB	5Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
 	DB	01h
 CTC_3_DATA:
-	DB	5Dh     ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
+	DB	5Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
 	DB	01h
 CTC_4_DATA:
-	DB	5Dh     ; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
+	DB	5Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
 	DB	01h
