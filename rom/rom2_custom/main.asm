@@ -7,7 +7,6 @@ START:
 	LD	I,A
 	LD	SP,0F7FFh	; Stack
 	CALL	INIT_F4_F0_F1
-	; CALL	L00E6		; Memory check and init
 	JR	INIT
 ; Second init here at 0x0012
 
@@ -15,7 +14,6 @@ START:
 INIT:
 	CALL	INIT_EI_RETI
 	CALL	INIT_IO
-	; CALL	L0245		; DI, re-init CTC 2, EI, wtf?
 	EI
 	TX_A	"X"
 	JP	MAIN_LOOP
@@ -62,14 +60,14 @@ loop:	; LD	A,(9461h)
 	CALL	KEYB_READ_1
 	CALL	KEYB_READ_2
 	CALL	KEYB_READ_3
-	; CALL	L3CDD		; Weird compare that doesn't lead to anywhere?
+
 	CALL	ADC_READ_ALL	; ADC reads
-	TX_A	"3"
-	LD	A, (ADC_3_DEST+1)
-	CALL SIO_A_TX_BLOCKING
-	TX_A	"6"
-	LD	A, (ADC_6_DEST+1)
-	CALL SIO_A_TX_BLOCKING
+	; TX_A	"3"
+	; LD	A, (ADC_3_DEST+1)
+	; CALL SIO_A_TX_BLOCKING
+	; LD	A, (ADC_3_DEST)
+	; CALL SIO_A_TX_BLOCKING
+	; TX_A	" "
 	; CALL	L44B7		; Process ADC readings
 	; CALL	L476A		; Process ADC readings
 	; CALL	L47BE		; Reads flag from shared memory, goes to the Brain(TM)
