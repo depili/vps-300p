@@ -22,7 +22,7 @@ TX_BUFFER_START			EQU	0x9200	; Start of the TX buffer, needs to be 0xXX00 as we 
 
 ; LCD
 LCD_FLAG			EQU	0xF800
-LCD_SRC				EQU	0xA000  ; Source for LCD data
+LCD_SRC				EQU	0xC000  ; Source for LCD data
 LCD_DEST			EQU	0xF801  ; Shared memory copy destination for lcd data
 LCD_BYTES			EQU	0xA0    ; 40 bytes per line, 4 lines = 160 = 0xA0 bytes
 LCD_POINTER			EQU	0x8100  ; Pointer for writing bytes to the LCD_SRC buffer
@@ -38,22 +38,22 @@ KEYB_CMD_END			EQU	0xE0
 KEYB_CMD_WRITE_DISPLAY  	EQU	0x90    ; Auto increment from address 0
 KEYB_CMD_READ_DATA		EQU	0x50    ; Auto increment from address 0
 ; Keyboard memory
-KEYB_1_DEST			EQU	0x9100
-KEYB_1_DISP			EQU	0x9110
-KEYB_2_DEST			EQU	0x9200
-KEYB_2_DISP			EQU	0x9210
-KEYB_3_DEST			EQU	0x9300
-KEYB_3_DISP			EQU	0x9310
+KEYB_1_DEST			EQU	0xB100
+KEYB_1_DISP			EQU	0xB110
+KEYB_2_DEST			EQU	0xB200
+KEYB_2_DISP			EQU	0xB210
+KEYB_3_DEST			EQU	0xB300
+KEYB_3_DISP			EQU	0xB310
 
 ; ADC
 ADC_CMD_TRIGGER			EQU	0xFF
-ADC_0_DEST			EQU	0xA000
-ADC_1_DEST			EQU	0xA002
-ADC_2_DEST			EQU	0xA004
-ADC_3_DEST			EQU	0xA006
-ADC_4_DEST			EQU	0xA008
-ADC_5_DEST			EQU	0xA00A
-ADC_6_DEST			EQU	0xA00C
+ADC_0_DEST			EQU	0xA000	; Hue
+ADC_1_DEST			EQU	0xA002	; Joystick Y (up-down)
+ADC_2_DEST			EQU	0xA004	; Clip
+ADC_3_DEST			EQU	0xA006	; T-bar
+ADC_4_DEST			EQU	0xA008	; Gain
+ADC_5_DEST			EQU	0xA00A	; Joystick Z (rotate)
+ADC_6_DEST			EQU	0xA00C	; Joystick X (left-right)
 ADC_READ_COUNTER		EQU	0xA00E
 
 ; IO PORTS

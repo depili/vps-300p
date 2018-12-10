@@ -6,6 +6,14 @@ RX_INIT:
 	LD	(RX_POINTER), HL
 	RET
 
+TX_INIT:
+	LD	A, 0x00
+	LD	(TX_COUNTER), A
+	LD	HL, TX_BUFFER_START
+	LD	(TX_PTR_WRITE), HL
+	LD	(TX_PTR_READ), HL
+	RET
+
 	; Write A to the TX ring buffer
 	; Destroys AF, D, HL
 TX_BUF_WRITE: PROC

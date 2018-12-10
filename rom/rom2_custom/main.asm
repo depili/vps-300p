@@ -16,7 +16,8 @@ INIT:
 	CALL	INIT_EI_RETI
 	CALL	INIT_IO
 	; CALL	L0245		; DI, re-init CTC 2, EI, wtf?
-	; EI
+	EI
+	TX_A	"X"
 	JP	MAIN_LOOP
 
 
@@ -52,6 +53,7 @@ MAIN_LOOP: PROC
 	; CALL	L06BA		; Send initial data if ping-pong
 	; CALL	L0812		; Send 0x86 0x63 0x01 0x00
 	; CALL	L081F		; PIO B bit 3 check
+	TX_A	"M"
 loop:	; LD	A,(9461h)
 	; AND	A
 	; JR	Z,loop_end
@@ -62,6 +64,12 @@ loop:	; LD	A,(9461h)
 	CALL	KEYB_READ_3
 	; CALL	L3CDD		; Weird compare that doesn't lead to anywhere?
 	CALL	ADC_READ_ALL	; ADC reads
+	TX_A	"3"
+	LD	A, (ADC_3_DEST+1)
+	CALL SIO_A_TX_BLOCKING
+	TX_A	"6"
+	LD	A, (ADC_6_DEST+1)
+	CALL SIO_A_TX_BLOCKING
 	; CALL	L44B7		; Process ADC readings
 	; CALL	L476A		; Process ADC readings
 	; CALL	L47BE		; Reads flag from shared memory, goes to the Brain(TM)
