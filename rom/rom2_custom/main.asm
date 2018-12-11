@@ -56,39 +56,24 @@ MAIN_LOOP: PROC
 	LD	(IX+6), SEG_6
 	LD	(IX+7), SEG_7
 	CALL	KEYB_WRITE_1	; Write the LCD characters
-	; CALL	L0743		; Send ping request if PIO B bit 3 is not set
-	; CALL	L03C8		; Memory setup
-	; CALL	L06BA		; Send initial data if ping-pong
-	; CALL	L0812		; Send 0x86 0x63 0x01 0x00
-	; CALL	L081F		; PIO B bit 3 check
 	TX_A	"M"
-loop:	; LD	A,(9461h)
-	; AND	A
-	; JR	Z,loop_end
-	; LD	A,00h
-	; LD	(9461h),A
+	LD	A, 0x00
+	LD	(ADC_READ_COUNTER), A
+loop:
 	CALL	KEYB_READ_1
 	CALL	KEYB_READ_2
 	CALL	KEYB_READ_3
 
+	LD	HL, ADC_READ_COUNTER
+	INC	(HL)
+	JR	NZ, loop
 	CALL	ADC_READ_ALL	; ADC reads
-	; TX_A	"3"
 	; LD	A, (ADC_3_DEST+1)
 	; CALL SIO_A_TX_BLOCKING
 	; LD	A, (ADC_3_DEST)
 	; CALL SIO_A_TX_BLOCKING
 	; TX_A	" "
-	; CALL	L44B7		; Process ADC readings
-	; CALL	L476A		; Process ADC readings
-	; CALL	L47BE		; Reads flag from shared memory, goes to the Brain(TM)
-	; CALL	L3D13		; Brain stuff?
-	; CALL	KEYB_WRITE_1	; Does also 7-segment encoding
-	; CALL	KEYB_WRITE_2	; Would also update the lamp bitmap
-	; CALL	L7205		; Brain stuff
-	; CALL	L7CAA		; PIO B bit 3 check and stuff
-loop_end:
-	; CALL	L7E50		; Sets PIO bit 1 conditionally, beeper?
-	; CALL	L7820		; Big compare, serial command process?
+	; TX_A	"-"
 	JR	loop
 ENDP
 
