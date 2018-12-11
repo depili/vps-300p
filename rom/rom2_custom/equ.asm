@@ -40,6 +40,12 @@ KEYB_CMD_READ_DATA		EQU	0x50    ; Auto increment from address 0
 ; Keyboard memory
 KEYB_1_DEST			EQU	0xB100
 KEYB_1_DISP			EQU	0xB110
+PATTERN_0			EQU	0xB110	; Pattern number, least significant digit
+PATTERN_1			EQU	0xB111
+PATTERN_2			EQU	0xB112	; Pattern number, most significant digit
+FRAMERATE_0			EQU	0xB115	; Frame rate, least significant digit
+FRAMERATE_1			EQU	0xB114
+FRAMERATE_3			EQU	0xB113	; Frame rate, most significant digit
 KEYB_2_DEST			EQU	0xB200
 KEYB_2_DISP			EQU	0xB210
 KEYB_3_DEST			EQU	0xB300
@@ -55,6 +61,24 @@ ADC_4_DEST			EQU	0xA008	; Gain
 ADC_5_DEST			EQU	0xA00A	; Joystick Z (rotate)
 ADC_6_DEST			EQU	0xA00C	; Joystick X (left-right)
 ADC_READ_COUNTER		EQU	0xA00E
+
+; LCD numbers and letters
+SEG_0				EQU	0x40	; 0
+SEG_1				EQU	0x79	; 1
+SEG_2				EQU	0x24	; 2
+SEG_3				EQU	0x30	; 3
+SEG_4				EQU	0x19	; 4
+SEG_5				EQU	0x12	; 5
+SEG_6				EQU	0x02	; 6
+SEG_7				EQU	0x78	; 7
+SEG_8				EQU	0x80	; 8
+SEG_9				EQU	0x10	; 9
+SEG_A				EQU	0x08	; A
+SEG_B				EQU	0x03	; B
+SEG_C				EQU	0x46	; C
+SEG_D				EQU	0x21	; d
+SEG_E				EQU	0x06	; E
+SEG_F				EQU	0x0E	; F
 
 ; IO PORTS
 KEYB_1_DATA			EQU	0x00

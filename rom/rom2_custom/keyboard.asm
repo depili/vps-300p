@@ -276,6 +276,25 @@ loop:	DEC	HL
 	RET
 ENDP
 
+	; gfedcba encoded 7 segment numbers and letters
+KEYB_NUMBERS:
+	DB	0x40	; 0
+	DB	0x79	; 1
+	DB	0x24	; 2
+	DB	0x30	; 3
+	DB	0x19	; 4
+	DB	0x12	; 5
+	DB	0x02	; 6
+	DB	0x78	; 7
+	DB	0x80	; 8
+	DB	0x10	; 9
+	DB	0x08	; A
+	DB	0x03	; B
+	DB	0x46	; C
+	DB	0x21	; d
+	DB	0x06	; E
+	DB	0x0E	; F
+
 KEYB_1_INIT_DATA:
 	DB	04h	; 0000 0100 Mode set: 8x8bit character display, left entry, encoded scan sensor matrix
 	DB	0A0h	; 1010 0000 Display write inhibit: none

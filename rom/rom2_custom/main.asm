@@ -46,6 +46,16 @@ PIO_VECTORS:
 
 	; L008C
 MAIN_LOOP: PROC
+	LD	IX, KEYB_1_DISP
+	LD	(IX), SEG_0
+	LD	(IX+1), SEG_1
+	LD	(IX+2), SEG_2
+	LD	(IX+3), SEG_3
+	LD	(IX+4), SEG_4
+	LD	(IX+5), SEG_5
+	LD	(IX+6), SEG_6
+	LD	(IX+7), SEG_7
+	CALL	KEYB_WRITE_1	; Write the LCD characters
 	; CALL	L0743		; Send ping request if PIO B bit 3 is not set
 	; CALL	L03C8		; Memory setup
 	; CALL	L06BA		; Send initial data if ping-pong

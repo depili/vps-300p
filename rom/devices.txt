@@ -19,3 +19,17 @@ The various devices have been mapped to the CPUs as follows:
 - Button lamps/leds:
         rom1 CPU has a 74597 parallel in - serial out device connected to IOs 0x00-0x03. It is controlled
         by L5783. This shifts data copied from EA00 shared memory out 0x1B bytes in total.
+- 7 segment displays
+        rom2 keyboard controller 1. Bytes 0-2 are the frame rate display, with byte 0 being least significant
+        digit. Bytes 3-5 are the pattern number with byte 5 being the least significant, so the order is flipped,
+        that is japan for you...
+        Bits are inverted, with bit 1 meaning the given segment is off.
+
+        Bitmap:
+         111
+        6   2
+        6   2
+         777
+        5   3
+        5   3
+         444

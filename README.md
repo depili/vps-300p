@@ -14,7 +14,7 @@ We have dumped, dissassembled and puzzled over the ROMs. There are two Z80 compa
 - [x] Button indicator leds, rom1 IO 00-03
 - [x] Keyboards, rom2 IO 00-06
 - [x] ADC, channels mapped, rom2 IO 08 and 09
-- [ ] 7 segment displays, rom2 keyboard1 display?
+- [x] 7 segment displays, rom2 keyboard1 display, weird mapping
 - [ ] Indicator lamp PWM on some buttons, rom2 keyboard2 display?
 - [ ] Beeper, rom2 pio pin?
 - [x] Serial control for LCD (rudimentary)
