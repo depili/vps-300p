@@ -85,9 +85,12 @@ L0186:	CALL	INIT_CTC
 	CALL	INIT_KEYB
 	CALL	PIO_A_SET_BIT_0
 	CALL	INIT_ADC
-	; CALL	L042D		; Zero shared memory
-	; CALL	L0793		; Checks PIO B bit 3, does stuff if it is high, dip switch?
-	; CALL	L07E2		; Checks PIO B bit 3, does stuff if it is high, dip switch?
+	CALL	INIT_SHARED_MEM	; Zero shared memory
+	RET
+
+	; L042D
+INIT_SHARED_MEM:
+	ZFILL	0xF800, 0x07FF
 	RET
 
 	; L0176
