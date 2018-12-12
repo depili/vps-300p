@@ -11,6 +11,7 @@ loop:	IN	A,(PIO_A_DATA)
 	RET
 ENDP
 
+	; Read an ADC channel
 ADC_R(ch,dest) MACRO
 	LD	B, 0xDF
 	LD	C, ch
@@ -31,6 +32,7 @@ ADC_READ_ALL:
 	CALL	ADC_MUX_RESET
 	RET
 
+	; Check given ADC channel for changes
 ADC_CHECK(channel) MACRO
 	LD	IX, ADC_0_OLD + (channel*2)
 	LD	IY, ADC_0_DEST + (channel*2)
@@ -44,7 +46,7 @@ ENDM
 
 	; Check for changes, send messages if needed
 	; For now, only check and transmit the top byte
-ADC_PROCESS: PROC
+ADC_PROCESS:
 	ADC_CHECK	0
 	ADC_CHECK	1
 	ADC_CHECK	2
@@ -52,7 +54,8 @@ ADC_PROCESS: PROC
 	ADC_CHECK	4
 	ADC_CHECK	5
 	ADC_CHECK	6
-ENDP
+	RET
+
 
 	; Send the ADC value via the TX buffer
 	; B = value to send (high byte)
@@ -63,7 +66,7 @@ ADC_SEND:
 	CALL	TX_BUF_WRITE
 	LD	A, B
 	CALL	TX_BUF_WRITE
-
+	RET
 
 	; --- START PROC L444D ---
 	; Not entirely sure
