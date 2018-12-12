@@ -1,7 +1,7 @@
 The various devices have been mapped to the CPUs as follows:
 
 - Beeper:
-        Maybe rom2 PIO port B bit 0?
+        Maybe rom2 PIO port B bit 0, active low
 - ADC:
         rom2 cpu, IO port 0x09, writing 0xFF triggers conversion, PIO port A bit 7 is ADC conversion ready.
         Data is read by two bytes from port 0x09, left justified 10bits

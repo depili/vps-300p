@@ -58,7 +58,7 @@ PIO port A In & out
 PIO port B In only
 
 PIO port A:
-bit 0 = beeper?
+bit 0 = beeper
 bit 7 = ADC conversion ready
 
 PIO port B:
