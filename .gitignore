@@ -1,0 +1,5 @@
+rom2_combined.*
+combined.*
+*.exe
+*~
+.DS_store
