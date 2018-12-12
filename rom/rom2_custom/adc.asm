@@ -11,14 +11,6 @@ loop:	IN	A,(PIO_A_DATA)
 	RET
 ENDP
 
-	; Read an ADC channel
-ADC_R(ch,dest) MACRO
-	LD	B, 0xDF
-	LD	C, ch
-	LD	IX, dest
-	CALL	ADC_READ
-ENDM
-
 	; --- START PROC L43FC ---
 	; The order is wonky, does it matter?
 ADC_READ_ALL:
@@ -31,18 +23,6 @@ ADC_READ_ALL:
 	ADC_R	0x03, ADC_3_DEST
 	CALL	ADC_MUX_RESET
 	RET
-
-	; Check given ADC channel for changes
-ADC_CHECK(channel) MACRO
-	LD	IX, ADC_0_OLD + (channel*2)
-	LD	IY, ADC_0_DEST + (channel*2)
-	LD	A, (IX)
-	LD	B, (IY)
-	LD	(IX), B				; Store the new value as "old"
-	LD	C, channel
-	CP	B
-	CALL	NZ, ADC_SEND
-ENDM
 
 	; Check for changes, send messages if needed
 	; For now, only check and transmit the top byte
