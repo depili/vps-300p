@@ -9,9 +9,9 @@ SIO_CMD_ERROR_RST		EQU	0x30
 SIO_CMD_RETI			EQU	0x38
 
 ; Serial protocol command bytes
-TX_CMD_KB1			EQU	0x91	; Keyboard events
-TX_CMD_KB2			EQU	0x92
-TX_CMD_KB3			EQU	0x93
+TX_CMD_KB_1			EQU	0x91	; Keyboard events
+TX_CMD_KB_2			EQU	0x92
+TX_CMD_KB_3			EQU	0x93
 TX_CMD_ADC_0			EQU	0xA0	; ADC changes
 TX_CMD_ADC_1			EQU	0xA1
 TX_CMD_ADC_2			EQU	0xA2
@@ -56,6 +56,7 @@ KEYB_CMD_END			EQU	0xE0
 KEYB_CMD_WRITE_DISPLAY  	EQU	0x90    ; Auto increment from address 0
 KEYB_CMD_READ_DATA		EQU	0x50    ; Auto increment from address 0
 ; Keyboard memory
+KEYB_CMD_BYTE			EQU	0xB000	; Command byte to send with encoded key event
 KEYB_1_DEST			EQU	0xB100	; New data read from the keyboard
 KEYB_1_OLD			EQU	0xB108	; Old data to compare
 KEYB_1_DISP			EQU	0xB110	; Display data buffer
