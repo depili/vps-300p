@@ -12,6 +12,20 @@ The various devices have been mapped to the CPUs as follows:
         Controller 1 (IO 0x00 and 0x01) probably has all 7-segment displays on it
         Controller 2 gets written into during the lamp test sequence, so it probably has some leds
         Controller 3 isn't written to during the lamp test.
+
+        Keyboard 1:
+                - Function buttons bellow the LCD
+                - Pattern number area buttons
+                - Keyer buttons, including clip potentiometer push to test
+                - Transition rate buttons
+                - Joystick buttons
+        Keyboard 2:
+                - PGM & PST
+                - Layer buttons
+                - Auto transition buttons
+        Keyboard 3:
+                - Top "sequencer" buttons
+                - Modify / menu buttons in the center
 - LCD
         rom1 cpu, PIO ports. PIO port A is the 8 bit data bus, PIO port B bits 0-2 are the control bits
         hitachi protocol.
