@@ -8,6 +8,24 @@ SIO_CMD_TX_IR_RST		EQU	0x28
 SIO_CMD_ERROR_RST		EQU	0x30
 SIO_CMD_RETI			EQU	0x38
 
+; Serial protocol command bytes
+TX_CMD_KB1			EQU	0x91	; Keyboard events
+TX_CMD_KB2			EQU	0x92
+TX_CMD_KB3			EQU	0x93
+TX_CMD_ADC_0			EQU	0xA0	; ADC changes
+TX_CMD_ADC_1			EQU	0xA1
+TX_CMD_ADC_2			EQU	0xA2
+TX_CMD_ADC_3			EQU	0xA3
+TX_CMD_ADC_4			EQU	0xA4
+TX_CMD_ADC_5			EQU	0xA5
+TX_CMD_ADC_6			EQU	0xA6
+
+RX_CMD_LAMP			EQU	0x80	; Lamps via shared mem
+RX_CMD_LCD			EQU	0x81	; LCD via shared meme
+RX_CMD_FRAME			EQU	0x82	; Frame rate 7 segment displays
+RX_CMD_PATTERN			EQU	0x83	; Pattern number 7 segment displays
+RX_CMD_PWM			EQU	0x84	; PWM via keyboard 2
+
 ; Serial receive
 RX_COUNTER			EQU	0x9000
 RX_POINTER			EQU	0x9002  ; Write pointer
@@ -57,12 +75,19 @@ KEYB_3_DISP			EQU	0xB310
 ; ADC
 ADC_CMD_TRIGGER			EQU	0xFF
 ADC_0_DEST			EQU	0xA000	; Hue
+ADC_0_OLD			EQU	0xA010	; Old value, we only send changes
 ADC_1_DEST			EQU	0xA002	; Joystick Y (up-down)
+ADC_1_OLD			EQU	0xA012
 ADC_2_DEST			EQU	0xA004	; Clip
+ADC_2_OLD			EQU	0xA014
 ADC_3_DEST			EQU	0xA006	; T-bar
+ADC_3_OLD			EQU	0XA016
 ADC_4_DEST			EQU	0xA008	; Gain
+ADC_4_OLD			EQU	0xA018
 ADC_5_DEST			EQU	0xA00A	; Joystick Z (rotate)
+ADC_5_OLD			EQU	0xA01A
 ADC_6_DEST			EQU	0xA00C	; Joystick X (left-right)
+ADC_6_OLD			EQU	0xA01C
 ADC_READ_COUNTER		EQU	0xA00E
 
 ; LCD numbers and letters
