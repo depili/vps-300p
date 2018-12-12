@@ -3,3 +3,5 @@ combined.*
 *.exe
 *~
 .DS_store
+rom/rom?_custom/*.bin
+rom/rom?_custom/*.hex
