@@ -18,6 +18,27 @@ ADC_R(ch,dest) MACRO
 	CALL	ADC_READ
 ENDM
 
+; Transmit contents of a keyboard buffer via SIO A
+TX_A_KB(keyboard_ptr) MACRO
+	LD	IX, keyboard_ptr
+	LD	A, (IX)
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, (IX+0x01)
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, (IX+0x02)
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, (IX+0x03)
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, (IX+0x04)
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, (IX+0x05)
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, (IX+0x06)
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, (IX+0x07)
+	CALL	SIO_A_TX_BLOCKING
+ENDM
+
 ; Macro to zero fill memory
 ZFILL(ptr,len) MACRO
 	LD  HL, ptr
