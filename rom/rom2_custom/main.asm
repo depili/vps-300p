@@ -46,6 +46,7 @@ PIO_VECTORS:
 
 	; L008C
 MAIN_LOOP: PROC
+	; 7 Segment display test
 	LD	IX, KEYB_1_DISP
 	LD	(IX), SEG_0
 	LD	(IX+1), SEG_1
@@ -88,9 +89,14 @@ L0186:	CALL	INIT_CTC
 	CALL	INIT_SHARED_MEM	; Zero shared memory
 	RET
 
-	; L042D
+
+	; Zero and initialize various structures in shared memory
 INIT_SHARED_MEM:
-	ZFILL	0xF800, 0x07FF
+	ZFILL	0xF800, 0x07FF			; Zero the 2Kb shared memory window
+
+	; Init LCD shared memory
+	LD	HL, LCD_DEST
+	LD	(LCD_POINTER), HL
 	RET
 
 	; L0176

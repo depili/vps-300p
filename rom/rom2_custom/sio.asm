@@ -79,8 +79,7 @@ check_msg:
 	JP	Z, lcd
 	JR	inc_bytes		; Invalid message
 lamp:
-	LD	A, "L"
-	CALL	SIO_A_TX_BLOCKING
+	; TX_A	"L"
 	LD	A, (RX_COUNTER)
 	CP	0x03
 	JP	C, shift		; not enough bytes for full message
@@ -99,14 +98,12 @@ lamp:
 	LD	C, 0x03			; Consume full message
 	JP	inc_bytes
 lcd:
-	LD	A, "D"
-	CALL	SIO_A_TX_BLOCKING
+	; TX_A	"D"
 	LD	A, (RX_COUNTER)
 	CP	0x02
 	JP	C, shift		; Not enough for full message
 	LD	A, (IX+0x01)
-	CALL	SIO_A_TX_BLOCKING
-	; CALL	  LCD_WRITE
+	CALL	LCD_WRITE
 	LD	C, 0x02
 	JP	inc_bytes
 inc_bytes:
@@ -146,6 +143,27 @@ set_pointer:
 	LD	C, A
 	ADD	HL, BC
 	LD	(RX_POINTER), HL
+	RET
+ENDP
+
+	; Write A to LCD_POINTER, increment it, resetting if needed
+LCD_WRITE: PROC
+	LD	HL, (LCD_POINTER)
+	LD	(HL), A
+	INC	HL
+	LD	A, 0x01
+	LD	(LCD_FLAG), A
+	LD	A, H
+	CP	0 + (LCD_DEST + LCD_BYTES) / 0x0100
+	JP	NZ, no_reset
+	LD	A, L
+	CP	0 + (LCD_DEST + LCD_BYTES) % 0x0100
+	JR	NZ, no_reset
+	LD	HL, LCD_DEST
+	LD	(LCD_POINTER), HL
+	RET
+no_reset:
+	LD	(LCD_POINTER), HL
 	RET
 ENDP
 

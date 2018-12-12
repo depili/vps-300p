@@ -29,7 +29,7 @@ LCD_POINTER			EQU	0x8100  ; Pointer for writing bytes to the LCD_SRC buffer
 LCD_WRITE_DEST			EQU	LCD_DEST
 
 ; Lamps
-LAMP_SRC			EQU	0xEA00  ; Source for lamp data in shared memory
+LAMP_SRC			EQU	0xFA00  ; Source for lamp data in shared memory
 LAMP_DEST			EQU	0x9500  ; Local memory destination for lamp data
 LAMP_BYTES			EQU	0x1B    ; 27 bytes for lamp data
 
