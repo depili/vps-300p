@@ -73,9 +73,9 @@ process:
 	RET				; No bytes in buffer
 check_msg:
 	LD	A, (IX)
-	CP	0x80			; Lamp message
+	CP	RX_CMD_LAMP		; Lamp message
 	JR	Z, lamp
-	CP	0x81			; LCD message
+	CP	RX_CMD_LCD		; LCD message
 	JP	Z, lcd
 	JR	inc_bytes		; Invalid message
 lamp:
