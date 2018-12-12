@@ -63,6 +63,7 @@ ADC_6_DEST			EQU	0xA00C	; Joystick X (left-right)
 ADC_READ_COUNTER		EQU	0xA00E
 
 ; LCD numbers and letters
+SEG_OFF				EQU	0xFF	; All off
 SEG_0				EQU	0x40	; 0
 SEG_1				EQU	0x79	; 1
 SEG_2				EQU	0x24	; 2
