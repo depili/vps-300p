@@ -16,7 +16,7 @@ We have dumped, dissassembled and puzzled over the ROMs. There are two Z80 compa
 - [x] ADC, channels mapped, rom2 IO 08 and 09
 - [x] 7 segment displays, rom2 keyboard1 display, weird mapping
 - [ ] Indicator lamp PWM on some buttons, rom2 keyboard2 display?
-- [ ] Beeper, rom2 pio pin?
+- [x] Beeper, rom2 PIO A bit 0, active low
 - [x] Serial control for LCD (rudimentary)
 - [x] Serial control for button indicator lamps
 - [ ] Serial communication for keyboard events (send whole sensor matrix or encode?)
