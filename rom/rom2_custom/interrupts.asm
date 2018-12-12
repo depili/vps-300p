@@ -22,13 +22,16 @@ INT_SIO_B_ERROR:
 	POP	AF
 	JP	0x8000
 
-INT_SIO_A_TX_EMPTY:
+INT_SIO_A_TX_EMPTY: PROC
 	DI
 	PUSH	AF
-	LD	A, "T"
-	OUT	(SIO_A_DATA), A
+	PUSH	HL
+	CALL	TX_BUF_READ		; Read a byte from the buffer, this disables the TX interrupt if empty
+	OUT	(SIO_A_DATA), A		; Send the byte
+	POP	HL
 	POP	AF
 	JP	0x8000
+ENDP
 
 INT_SIO_A_STATUS_CHANGE:
 	DI
