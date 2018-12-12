@@ -38,8 +38,9 @@ KEYB_CMD_END			EQU	0xE0
 KEYB_CMD_WRITE_DISPLAY  	EQU	0x90    ; Auto increment from address 0
 KEYB_CMD_READ_DATA		EQU	0x50    ; Auto increment from address 0
 ; Keyboard memory
-KEYB_1_DEST			EQU	0xB100
-KEYB_1_DISP			EQU	0xB110
+KEYB_1_DEST			EQU	0xB100	; New data read from the keyboard
+KEYB_1_OLD			EQU	0xB108	; Old data to compare
+KEYB_1_DISP			EQU	0xB110	; Display data buffer
 PATTERN_0			EQU	0xB110	; Pattern number, least significant digit
 PATTERN_1			EQU	0xB111
 PATTERN_2			EQU	0xB112	; Pattern number, most significant digit
@@ -47,8 +48,10 @@ FRAMERATE_0			EQU	0xB115	; Frame rate, least significant digit
 FRAMERATE_1			EQU	0xB114
 FRAMERATE_3			EQU	0xB113	; Frame rate, most significant digit
 KEYB_2_DEST			EQU	0xB200
+KEYB_2_OLD			EQU	0xB108
 KEYB_2_DISP			EQU	0xB210
 KEYB_3_DEST			EQU	0xB300
+KEYB_2_OLD			EQU	0xB108
 KEYB_3_DISP			EQU	0xB310
 
 ; ADC
