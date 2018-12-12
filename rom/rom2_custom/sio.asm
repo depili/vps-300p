@@ -23,7 +23,7 @@ TX_BUF_WRITE: PROC
 	CP	0xFF
 	JR	Z, return		; Buffer full
 	LD	A, D			; Restore the byte to be written
-	LD	HL, TX_PTR_WRITE
+	LD	HL, (TX_PTR_WRITE)
 	LD	(HL), A
 	INC	L			; Increment the pointer, will loop on the last byte
 	LD	(TX_PTR_WRITE), HL
