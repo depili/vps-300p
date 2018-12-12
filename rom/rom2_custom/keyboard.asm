@@ -1,3 +1,78 @@
+	; IX = new data
+	; IY = old data
+	; C = Counter for the checked byte, later encoded into the keyboard event byte
+	; Messes up AF
+KEYB_PROCESS: PROC
+	LD	C, 0x00		; Byte being checked
+loop:	LD	B, (IX)
+	LD	A, (IY)
+	XOR	B
+	CALL	NZ, KEYB_BYTE_DIFF
+	INC	C
+	LD	A, C
+	CP	0x08
+	RET	Z
+	INC	IX
+	INC	IY
+	JR	loop
+ENDP
+
+	; A - old reading
+	; B - new new reading
+	; E - Encoded bit number and key up/down bit
+	; Messes up AF
+	; Do not corrupt: IX, IY, C
+KEYB_BYTE_DIFF: PROC
+	BIT	0, A
+	JR	NZ, bit_0
+	BIT	1, A
+	JR	NZ, bit_1
+	BIT	2, A
+	JR	NZ, bit_2
+	BIT	3, A
+	JR	NZ, bit_3
+	BIT	4, A
+	JR	NZ, bit_4
+	BIT	5, A
+	JR	NZ, bit_5
+	BIT	6, A
+	JR	NZ, bit_6
+	BIT	7, A
+	JR	NZ, bit_7
+	RET
+bit_0:
+	KB_BIT	0
+bit_1:
+	KB_BIT	1
+bit_2:
+	KB_BIT	2
+bit_3:
+	KB_BIT	3
+bit_4:
+	KB_BIT	4
+bit_5:
+	KB_BIT	5
+bit_6:
+	KB_BIT	6
+bit_7:
+	KB_BIT	7
+ENDP
+
+	; Send a keyboard event via TX buffer
+	; C - changed byte
+	; E - changed bit and key up/down
+KEYB_SEND:
+	PUSH	AF
+	PUSH	BC
+	LD	A, (KEYB_CMD_BYTE)
+	CALL	TX_BUF_WRITE
+	LD	A, C
+	OR	E
+	CALL	TX_BUF_WRITE
+	POP	BC
+	POP	AF
+	RET
+
 	; --- START PROC L035F ---
 INIT_KEYB:
 	LD	HL,KEYB_1_INIT_DATA
@@ -41,8 +116,14 @@ KEYB_READ_1:
 	INIR
 	LD	A,KEYB_CMD_END
 	OUT	(KEYB_1_CMD),A
-	TX_A	"1"
-	TX_A_KB	KEYB_1_DEST
+	; TX_A	"1"
+	; TX_A_KB	KEYB_1_DEST
+	LD	A, TX_CMD_KB_1
+	LD	(KEYB_CMD_BYTE), A
+	LD	IX, KEYB_1_DEST
+	LD	IY, KEYB_1_OLD
+	CALL	KEYB_PROCESS
+	MCOPY	KEYB_1_DEST, KEYB_1_OLD, 0x08
 	RET
 
 	; --- START PROC L0CEF ---

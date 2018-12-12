@@ -18,6 +18,20 @@ ADC_R(ch,dest) MACRO
 	CALL	ADC_READ
 ENDM
 
+; Encode a changed keyboard bit and clear the change
+; B - New keyboard data
+; E - encoded changed bit and keyup/down state
+KB_BIT(chk_bit) MACRO
+	LD	E, 0 + (chk_bit << 3)		; Bit code
+	BIT	chk_bit, B
+	JR	Z, send
+	SET	6, E
+send:
+	CALL	KEYB_SEND
+	RES	chk_bit, A
+	JP	KEYB_BYTE_DIFF
+ENDM
+
 ; Transmit contents of a keyboard buffer via SIO A
 TX_A_KB(keyboard_ptr) MACRO
 	LD	IX, keyboard_ptr
