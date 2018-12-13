@@ -29,8 +29,18 @@ TX_BUF_WRITE: PROC
 	LD	(TX_PTR_WRITE), HL
 	LD	HL, TX_COUNTER
 	INC	(HL)
-	CALL	SIO_A_TX_EI		; Enable the transmit buffer empty interrupt
-return: EI
+return:
+	LD	A, 0x01			; Select register 1
+	OUT	(SIO_A_CMD), A
+	IN	A, (SIO_A_CMD)		; Read register 1
+	BIT	0, A			; Bit 0 is "All sent"
+	JR	NZ, send		; Buffer empty, transmit the first character directly
+
+	EI
+	RET
+send:	CALL	TX_BUF_READ
+	OUT	(SIO_A_DATA), A
+	EI
 	RET
 ENDP
 
@@ -44,21 +54,11 @@ TX_BUF_READ:
 	LD	(TX_PTR_READ), HL
 	LD	HL, TX_COUNTER
 	DEC	(HL)
-	CALL	Z, SIO_A_TX_DI		; Zero bytes in the buffer, disable TX interrupt
-	RET
-
-SIO_A_TX_EI:
-	LD	A, 0x01
-	OUT	(SIO_A_CMD), A		; Write register 1
-	LD	A, 0x12
-	OUT	(SIO_A_CMD), A		; RX interrupt on all characters, TX interrupt on
 	RET
 
 SIO_A_TX_DI:
-	LD	A, 0x01
-	OUT	(SIO_A_CMD), A		; Write register 1
-	LD	A, 0x10
-	OUT	(SIO_A_CMD), A		; RX interrupt on all characters
+	LD	A, SIO_CMD_TX_IR_RST
+	OUT	(SIO_A_CMD), A		; Reset TX interrupt pending
 	RET
 
 ; Check the RX buffer
@@ -195,7 +195,7 @@ INIT_SIO:
 	LD	B,0Dh
 	OTIR
 	LD	HL,SIO_B_INIT_DATA
-	LD	C,1Bh
+	LD	C,SIO_B_CMD
 	LD	B,0Fh
 	OTIR
 	; CALL	L0B62		; Memory setup

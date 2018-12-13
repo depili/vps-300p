@@ -26,11 +26,17 @@ INT_SIO_A_TX_EMPTY: PROC
 	DI
 	PUSH	AF
 	PUSH	HL
+	LD	A, (TX_COUNTER)
+	AND	A
+	JR	Z, buff_empty
 	CALL	TX_BUF_READ		; Read a byte from the buffer, this disables the TX interrupt if empty
 	OUT	(SIO_A_DATA), A		; Send the byte
-	POP	HL
+return:	POP	HL
 	POP	AF
 	JP	0x8000
+buff_empty:
+	CALL	SIO_A_TX_DI
+	JR	return
 ENDP
 
 INT_SIO_A_STATUS_CHANGE:
