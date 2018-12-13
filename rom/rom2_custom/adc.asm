@@ -22,6 +22,7 @@ ADC_READ_ALL:
 	ADC_R	0x05, ADC_5_DEST
 	ADC_R	0x03, ADC_3_DEST
 	CALL	ADC_MUX_RESET
+	CALL	ADC_PROCESS
 	RET
 
 	; Check for changes, send messages if needed
@@ -36,6 +37,24 @@ ADC_PROCESS:
 	ADC_CHECK	6
 	RET
 
+ADC_COMPARE: PROC
+	LD	A, (IX+1)	; Old value, most significant 8 bits
+	LD	B, (IY+1)	; New value, most significant 8 bits
+	LD	E, (IY)		; New value, least significat 2 bits
+	LD	(IX+1), B	; Store the new value as "old"
+	LD	(IX), E
+	SRL	A		; Divide both old and new bytes by 2
+	SRL	B
+	CP	B		; Compare old and new top bytes, thus ignoring lowest bit
+	JR	NZ, send	; Send if changed enough
+	RET
+send:	LD	B, (IY+1)
+	LD	E, (IY)
+	SRL	B
+	RR	E
+	CALL	ADC_SEND
+	RET
+ENDP
 
 	; Send the ADC value via the TX buffer
 	; B = value to send (high byte)
@@ -43,9 +62,11 @@ ADC_PROCESS:
 ADC_SEND:
 	LD	A, TX_CMD_ADC_0
 	OR	C
-	CALL	TX_BUF_WRITE
+	CALL	SIO_A_TX_BLOCKING
 	LD	A, B
-	CALL	TX_BUF_WRITE
+	CALL	SIO_A_TX_BLOCKING
+	LD	A, E
+	CALL	SIO_A_TX_BLOCKING
 	RET
 
 	; --- START PROC L444D ---

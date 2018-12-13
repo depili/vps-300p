@@ -2,12 +2,8 @@
 ADC_CHECK(channel) MACRO
 	LD	IX, ADC_0_OLD + (channel*2)
 	LD	IY, ADC_0_DEST + (channel*2)
-	LD	A, (IX)
-	LD	B, (IY)
-	LD	(IX), B				; Store the new value as "old"
 	LD	C, channel
-	CP	B
-	CALL	NZ, ADC_SEND
+	CALL	ADC_COMPARE
 ENDM
 
 ; Read an ADC channel
