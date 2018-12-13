@@ -24,7 +24,7 @@ ENDM
 KB_BIT(chk_bit) MACRO
 	LD	E, 0 + (chk_bit << 3)		; Bit code
 	BIT	chk_bit, B
-	JR	Z, send
+	JR	Z, $+0x04
 	SET	6, E
 send:
 	CALL	KEYB_SEND
