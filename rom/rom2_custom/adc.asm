@@ -39,19 +39,20 @@ ADC_PROCESS:
 
 ADC_COMPARE: PROC
 	LD	A, (IX+1)	; Old value, most significant 8 bits
-	LD	B, (IY+1)	; New value, most significant 8 bits
+	LD	H, (IY+1)	; New value, most significant 8 bits
 	LD	E, (IY)		; New value, least significat 2 bits
-	LD	(IX+1), B	; Store the new value as "old"
+	LD	(IX+1), H	; Store the new value as "old"
 	LD	(IX), E
-	SRL	A		; Divide both old and new bytes by 2
-	SRL	B
-	CP	B		; Compare old and new top bytes, thus ignoring lowest bit
-	JR	NZ, send	; Send if changed enough
-	RET
-send:	LD	B, (IY+1)
-	LD	E, (IY)
-	SRL	B
-	RR	E
+;	SRL	A		; Divide both old and new bytes by 2
+;	SRL	H
+;	CP	H		; Compare old and new top bytes, thus ignoring lowest bit
+;	JR	NZ, send	; Send if changed enough
+;	RET
+send:	LD	H, (IY+1)
+	LD	L, (IY)
+	SRL	H
+	RR	L
+	SRL	L
 	CALL	ADC_SEND
 	RET
 ENDP
@@ -63,9 +64,9 @@ ADC_SEND:
 	LD	A, TX_CMD_ADC_0
 	OR	C
 	CALL	SIO_A_TX_BLOCKING
-	LD	A, B
+	LD	A, H
 	CALL	SIO_A_TX_BLOCKING
-	LD	A, E
+	LD	A, L
 	CALL	SIO_A_TX_BLOCKING
 	RET
 
