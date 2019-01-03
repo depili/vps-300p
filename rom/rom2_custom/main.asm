@@ -115,9 +115,9 @@ INIT_EI_RETI:
 
 INIT_F4_F0_F1:
 	LD	A,00h
-	OUT	(0F4h),A
-	LD	A,5Bh
+	OUT	(0F4h),A	; Interrupt priority register
+	LD	A,5Bh		; 0101 1011 WDTER = 0 WDTPR = 10 HaltMR = run
 	OUT	(0F0h),A
-	LD	A,0B1h
+	LD	A,0B1h		; 0x1B	- WDT disable
 	OUT	(0F1h),A
 	RET

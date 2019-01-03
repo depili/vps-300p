@@ -28,8 +28,8 @@ INT_SIO_A_TX_EMPTY: PROC
 	PUSH	HL
 	LD	A, (TX_COUNTER)
 	AND	A
-	JR	Z, buff_empty
-	CALL	TX_BUF_READ		; Read a byte from the buffer, this disables the TX interrupt if empty
+	JR	Z, buff_empty		; Buffer empty, disable the interrupt
+	CALL	TX_BUF_READ		; Read a byte from the buffer
 	OUT	(SIO_A_DATA), A		; Send the byte
 return:	POP	HL
 	POP	AF
