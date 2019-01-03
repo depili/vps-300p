@@ -17,7 +17,6 @@ TX_INIT:
 	; Write A to the TX ring buffer
 	; Destroys AF, D, HL
 TX_BUF_WRITE: PROC
-	DI
 	LD	D, A			; Tuck away the byte to be written
 	LD	A, (TX_COUNTER)
 	CP	0xFF
@@ -30,17 +29,6 @@ TX_BUF_WRITE: PROC
 	LD	HL, TX_COUNTER
 	INC	(HL)
 return:
-	LD	A, 0x01			; Select register 1
-	OUT	(SIO_A_CMD), A
-	IN	A, (SIO_A_CMD)		; Read register 1
-	BIT	0, A			; Bit 0 is "All sent"
-	JR	NZ, send		; Buffer empty, transmit the first character directly
-
-	EI
-	RET
-send:	CALL	TX_BUF_READ
-	OUT	(SIO_A_DATA), A
-	EI
 	RET
 ENDP
 
@@ -57,8 +45,17 @@ TX_BUF_READ:
 	RET
 
 SIO_A_TX_DI:
-	LD	A, SIO_CMD_TX_IR_RST
-	OUT	(SIO_A_CMD), A		; Reset TX interrupt pending
+	LD	A, 0x01
+	OUT	(SIO_A_CMD), A
+	LD	A, 0x10
+	OUT	(SIO_A_CMD), A
+	RET
+
+SIO_A_TX_EI:
+	LD	A, 0x01
+	OUT	(SIO_A_CMD), A
+	LD	A, 0x12
+	OUT	(SIO_A_CMD), A
 	RET
 
 ; Check the RX buffer
