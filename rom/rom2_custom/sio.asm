@@ -215,21 +215,23 @@ SIO_A_INIT_DATA:
 	DB	18h	; CMD error reset
 	DB	10h	; CMD reset status interrupts
 	DB	04h	; Write register 4
-	DB	45h	; 1,5 stop bits, even parity, 8bit programmed sync, data rate=16x clock rate
+;	DB	45h	; 0100 0101 1,5 stop bits, even parity, 8bit programmed sync, data rate=16x clock rate
+;	DB	02h	; 0000 0010 1 stop bit, no parity, 8bit programmed sync, data rate=1x clock rate
+	DB	42h	; 0100 0010 1 stop bit, no parity, 8bit programmed sync, data rate=16x clock rate
 	DB	03h	; Write register 3
 	DB	0C1h	; RX enable, 8 bits per character
 	DB	05h	; Write register 5
 	DB	0EAh	; TX crc disable, RTS low, TX enable, DTR low, external sync
 	DB	10h	; CMD reset status interrupts
 	DB	01h	; Write register 1
-	DB	10h	; receive interrupt on all characters (was 12h)
+	DB	12h	; receive interrupt on all characters (was 12h)
 SIO_B_INIT_DATA:
 	DB	00h	; Write register 0
 	DB	00h
 	DB	18h	; CMD error reset
 	DB	10h	; CMD reset status interrupts
 	DB	04h	; Write register 4
-	DB	0C5h	; 1,5 stop bits, even parity, 8bit programmed sync, data rate=16x clock rate
+	DB	0C5h	; 1100 0101 1,5 stop bits, even parity, 8bit programmed sync, data rate=64x clock rate
 	DB	03h	; Write register 3
 	DB	0C1h	; RX enable, 8 bits per character
 	DB	05h	; Write register 5

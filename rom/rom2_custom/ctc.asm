@@ -21,7 +21,9 @@ L0217:	LD	HL,CTC_1_DATA
 CTC_1_DATA:
 	DB	CTC_VECTORS % 0x0100	 ; Interrupt vector location
 	DB	05Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset WAS 0DDh
-	DB	0Ch
+	DB	0Ch	; for 16x SIO clock, 38 400baud
+;	DB	0x44	; for 1x SIO clock, 115 200baud
+;	DB	0x8A	; for 1x SIO clock, 57 600baud
 CTC_2_DATA:
 	DB	5Dh	; No interrupt, Counter, prescaler 16, rising edge, clk starts, time constant follows, no reset
 	DB	01h
