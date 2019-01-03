@@ -22,9 +22,11 @@ TX_CMD_ADC_6			EQU	0xA6
 
 RX_CMD_LAMP			EQU	0x80	; Lamps via shared mem
 RX_CMD_LCD			EQU	0x81	; LCD via shared meme
-RX_CMD_FRAME			EQU	0x82	; Frame rate 7 segment displays
-RX_CMD_PATTERN			EQU	0x83	; Pattern number 7 segment displays
-RX_CMD_PWM			EQU	0x84	; PWM via keyboard 2
+RX_CMD_LCD_HOME			EQU	0x82	; Reset LCD write pointer
+RX_CMD_FRAME			EQU	0x83	; Frame rate 7 segment displays
+RX_CMD_PATTERN			EQU	0x84	; Pattern number 7 segment displays
+RX_CMD_PWM			EQU	0x85	; PWM via keyboard 2
+
 
 ; Serial receive
 RX_COUNTER			EQU	0x9000

@@ -71,10 +71,16 @@ process:
 check_msg:
 	LD	A, (IX)
 	CP	RX_CMD_LAMP		; Lamp message
-	JR	Z, lamp
+	JP	Z, lamp
 	CP	RX_CMD_LCD		; LCD message
 	JP	Z, lcd
-	JR	inc_bytes		; Invalid message
+	CP	RX_CMD_LCD_HOME		; Reset LCD pointer
+	JP	Z, lcd_home
+	CP	RX_CMD_FRAME		; Set the "Frame rate" display
+	JP	Z, frame
+	CP	RX_CMD_PATTERN		; Set the "Patter number" display
+	JP	Z, pattern
+	JP	inc_bytes		; Invalid message
 lamp:
 	; TX_A	"L"
 	LD	A, (RX_COUNTER)
@@ -102,6 +108,35 @@ lcd:
 	LD	A, (IX+0x01)
 	CALL	LCD_WRITE
 	LD	C, 0x02
+	JP	inc_bytes
+lcd_home:
+	LD	HL, LCD_DEST
+	LD	(LCD_POINTER), HL
+	LD	C, 0x01
+	JP	inc_bytes
+frame:
+	LD	A, (RX_COUNTER)
+	CP	0x04
+	JP	C, shift		; Not enough bytes for full message
+	LD	A, (IX+1)		; Need to juggle the data little to deal with
+	LD	(KEYB_1_DISP+0x02), A	; the numbers being right-to-left...
+	LD	A, (IX+2)
+	LD	(KEYB_1_DISP+0x01), A
+	LD	A, (IX+3)
+	LD	(KEYB_1_DISP), A
+	LD	C, 0x04
+	JP	inc_bytes
+pattern:
+	LD	A, (RX_COUNTER)
+	CP	0x04
+	JP	C, shift		; Not enough bytes
+	LD	A, (IX+1)
+	LD	(KEYB_1_DISP+0x03), A
+	LD	A, (IX+2)
+	LD	(KEYB_1_DISP+0x04), A
+	LD	A, (IX+3)
+	LD	(KEYB_1_DISP+0x05), A
+	LD	C, 0x04
 	JP	inc_bytes
 inc_bytes:
 	LD	A, "i"
