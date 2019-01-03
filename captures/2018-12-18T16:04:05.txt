@@ -1,0 +1,16 @@
+T1 => 91 79 Keyboard 1 key 39 F_plusminus down
+T1 => 91 39 Keyboard 1 key 39 F_plusminus up
+T1 => 91 71 Keyboard 1 key 31 F_play down
+T1 => 91 31 Keyboard 1 key 31 F_play up
+T1 => 91 49 Keyboard 1 key 09 F_f0 down
+T1 => 91 09 Keyboard 1 key 09 F_f0 up
+T1 => 91 41 Keyboard 1 key 01 F_f1 down
+T1 => 91 01 Keyboard 1 key 01 F_f1 up
+T1 => 91 78 Keyboard 1 key 38 F_f2 down
+T1 => 91 38 Keyboard 1 key 38 F_f2 up
+T1 => 91 70 Keyboard 1 key 30 F_f3 down
+T1 => 91 30 Keyboard 1 key 30 F_f3 up
+T1 => 91 68 Keyboard 1 key 28 F_f4 down
+T1 => 91 28 Keyboard 1 key 28 F_f4 up
+T1 => 91 60 Keyboard 1 key 20 F_f5 down
+T1 => 91 20 Keyboard 1 key 20 F_f5 up

@@ -1,0 +1,16 @@
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 20 T-bar 225
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224
+T1 => A3 3C 00 T-bar 224

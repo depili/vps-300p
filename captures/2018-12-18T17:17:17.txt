@@ -1,0 +1,2 @@
+T1 => 92 6E Keyboard 2 key 2E PST_6 down
+T1 => 92 2E Keyboard 2 key 2E PST_6 up

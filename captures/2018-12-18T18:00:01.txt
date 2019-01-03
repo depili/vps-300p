@@ -1,0 +1,4 @@
+T1 => 92 7E Keyboard 2 key 3E PST_8 down
+T1 => 92 3E Keyboard 2 key 3E PST_8 up
+T1 => 92 76 Keyboard 2 key 36 PST_7 down
+T1 => 92 36 Keyboard 2 key 36 PST_7 up

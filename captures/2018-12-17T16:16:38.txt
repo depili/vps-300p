@@ -1,0 +1,11 @@
+T1 => 91 06 Keyboard 1 key 06 up
+T1 => 91 07 Keyboard 1 key 07 up
+T1 => 91 08 Keyboard 1 key 08 up
+T1 => 91 09 Keyboard 1 key 09 up
+T1 => 91 0A Keyboard 1 key 0A up
+T1 => 91 0B Keyboard 1 key 0B up
+T1 => 91 0C Keyboard 1 key 0C up
+T1 => 91 0D Keyboard 1 key 0D up
+T1 => 91 0E Keyboard 1 key 0E up
+T1 => 91 0F Keyboard 1 key 0F up
+T1 => 91 10 Keyboard 1 key 10 up
