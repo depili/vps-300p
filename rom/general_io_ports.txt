@@ -12,3 +12,7 @@
 1D      PIO Port A command
 1E      PIO Port B data
 1F      PIO Port B command
+
+F0      Halt mode register
+F1      Watchdog control register
+F4      Interrupt priority register
