@@ -77,21 +77,22 @@ KEYB_3_DISP			EQU	0xB310
 
 ; ADC
 ADC_CMD_TRIGGER			EQU	0xFF
-ADC_0_DEST			EQU	0xA000	; Hue
-ADC_0_OLD			EQU	0xA010	; Old value, we only send changes
-ADC_1_DEST			EQU	0xA002	; Joystick Y (up-down)
-ADC_1_OLD			EQU	0xA012
-ADC_2_DEST			EQU	0xA004	; Clip
-ADC_2_OLD			EQU	0xA014
-ADC_3_DEST			EQU	0xA006	; T-bar
-ADC_3_OLD			EQU	0XA016
-ADC_4_DEST			EQU	0xA008	; Gain
-ADC_4_OLD			EQU	0xA018
-ADC_5_DEST			EQU	0xA00A	; Joystick Z (rotate)
-ADC_5_OLD			EQU	0xA01A
-ADC_6_DEST			EQU	0xA00C	; Joystick X (left-right)
-ADC_6_OLD			EQU	0xA01C
-ADC_READ_COUNTER		EQU	0xA00E
+ADC_0_DEST			EQU	0x8A00	; Hue
+ADC_0_OLD			EQU	0x8A10	; Old value, we only send changes
+ADC_1_DEST			EQU	0x8A02	; Joystick Y (up-down)
+ADC_1_OLD			EQU	0x8A12
+ADC_2_DEST			EQU	0x8A04	; Clip
+ADC_2_OLD			EQU	0x8A14
+ADC_3_DEST			EQU	0x8A06	; T-bar
+ADC_3_OLD			EQU	0x8A16
+ADC_4_DEST			EQU	0x8A08	; Gain
+ADC_4_OLD			EQU	0x8A18
+ADC_5_DEST			EQU	0x8A0A	; Joystick Z (rotate)
+ADC_5_OLD			EQU	0x8A1A
+ADC_6_DEST			EQU	0x8A0C	; Joystick X (left-right)
+ADC_6_OLD			EQU	0x8A1C
+ADC_READ_COUNTER		EQU	0x8A0E
+ADC_READ_COUNTER2		EQU	0x8A0F
 
 ; LCD numbers and letters
 SEG_OFF				EQU	0xFF	; All off

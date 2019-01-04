@@ -250,9 +250,9 @@ SIO_A_INIT_DATA:
 	DB	18h	; CMD error reset
 	DB	10h	; CMD reset status interrupts
 	DB	04h	; Write register 4
-;	DB	45h	; 0100 0101 1,5 stop bits, even parity, 8bit programmed sync, data rate=16x clock rate
-;	DB	02h	; 0000 0010 1 stop bit, no parity, 8bit programmed sync, data rate=1x clock rate
-	DB	42h	; 0100 0010 1 stop bit, no parity, 8bit programmed sync, data rate=16x clock rate
+;	DB	45h	; 0100 0101 1 stop bit, even parity, 8bit programmed sync, data rate=16x clock rate
+;	DB	04h	; 0000 0100 1 stop bit, no parity, 8bit programmed sync, data rate=1x clock rate
+	DB	44h	; 0100 0100 1 stop bit, no parity, 8bit programmed sync, data rate=16x clock rate
 	DB	03h	; Write register 3
 	DB	0C1h	; RX enable, 8 bits per character
 	DB	05h	; Write register 5

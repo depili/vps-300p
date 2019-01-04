@@ -54,7 +54,27 @@ INT_SIO_A_RX_AVAILABLE: PROC
 	PUSH	DE
 	PUSH	HL
 	IN	A, (SIO_A_DATA)		; Read the character
-	OUT	(SIO_A_DATA), A
+	; OUT	(SIO_A_DATA), A
+	LD	D, A			; Tuck the read character into D
+	LD	A, (RX_COUNTER)
+	AND	A
+	JR	Z, first_byte		; Seek for the start byte
+	CP	RX_MAX_BYTES
+	JR	Z, return		; Buffer full
+	LD	A, D			; Restore read character
+store:	LD	HL, (RX_POINTER)
+	LD	(HL), A
+	INC	HL
+	LD	(RX_POINTER), HL
+	LD	HL, RX_COUNTER
+	INC	(HL)
+	; LD	A, (HL)
+	; OUT	(SIO_A_DATA), A		; Send the RX count
+	JR	return
+first_byte:
+	LD	A, D			; Restore read character
+	BIT	7, A
+	JR	NZ, store		; Valid first byte
 return: POP	HL
 	POP	DE
 	POP	BC

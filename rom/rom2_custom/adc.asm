@@ -38,11 +38,11 @@ ADC_PROCESS:
 	RET
 
 ADC_COMPARE: PROC
-	LD	A, (IX+1)	; Old value, most significant 8 bits
-	LD	H, (IY+1)	; New value, most significant 8 bits
-	LD	E, (IY)		; New value, least significat 2 bits
-	LD	(IX+1), H	; Store the new value as "old"
-	LD	(IX), E
+;	LD	A, (IX+1)	; Old value, most significant 8 bits
+;	LD	H, (IY+1)	; New value, most significant 8 bits
+;	LD	E, (IY)		; New value, least significat 2 bits
+;	LD	(IX+1), H	; Store the new value as "old"
+;	LD	(IX), E
 ;	SRL	A		; Divide both old and new bytes by 2
 ;	SRL	H
 ;	CP	H		; Compare old and new top bytes, thus ignoring lowest bit
@@ -106,36 +106,36 @@ wait:	IN	A,(PIO_A_DATA)
 	JP	NZ,wait
 	IN	A,(ADC_IO)
 	LD	(IX+01h),A
-	LD	H,A
+	; LD	H,A
 	IN	A,(ADC_IO)
 	LD	(IX+00h),A
-	LD	L,A
-	SRL	H			; HL >> 6
-	RR	L
-	SRL	H
-	RR	L
-	SRL	H
-	RR	L
-	SRL	H
-	RR	L
-	SRL	H
-	RR	L
-	SRL	H
-	RR	L
-	ADD	HL,DE
-	EX	DE,HL
-	LD	A,(ADC_READ_COUNTER)
-	DEC	A
-	LD	(ADC_READ_COUNTER),A
-	JP	NZ,loop			; executed 16 times
-	EX	DE,HL
-	ADD	HL,HL			; HL * 4
-	ADD	HL,HL
-	LD	A,H
-	LD	(IX+01h),A
-	LD	A,L
-	AND	0C0h			; Mask leaves top 2 bytes
-	LD	(IX+00h),A
+	; LD	L,A
+	; SRL	H			; HL >> 6
+	; RR	L
+	; SRL	H
+	; RR	L
+	; SRL	H
+	; RR	L
+	; SRL	H
+	; RR	L
+	; SRL	H
+	; RR	L
+	; SRL	H
+	; RR	L
+	; ADD	HL,DE
+	; EX	DE,HL
+	; LD	A,(ADC_READ_COUNTER)
+	; DEC	A
+	; LD	(ADC_READ_COUNTER),A
+	; JP	NZ,loop			; executed 16 times
+	; EX	DE,HL
+	; ADD	HL,HL			; HL * 4
+	; ADD	HL,HL
+	; LD	A,H
+	; LD	(IX+01h),A
+	; LD	A,L
+	; AND	0C0h			; Mask leaves top 2 bytes
+	; LD	(IX+00h),A
 	RET
 ENDP
 
