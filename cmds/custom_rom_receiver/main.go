@@ -137,13 +137,20 @@ func main() {
 			pKB.Text = strings.Join(kbText, "\n")
 			ui.Render(pKB)
 		case s := <-adcChan:
-			gJoyX.Percent = s[0] / 10
-			gJoyY.Percent = s[1] / 10
-			gJoyZ.Percent = s[2] / 10
-			gClip.Percent = s[3] / 10
-			gGain.Percent = s[4] / 10
-			gHue.Percent = s[5] / 10
-			gTbar.Percent = s[6] / 10
+			gJoyX.Percent = s[0] * 100 / 1023
+			gJoyX.Label = fmt.Sprintf("%d", s[0])
+			gJoyY.Percent = s[1] * 100 / 1023
+			gJoyY.Label = fmt.Sprintf("%d", s[1])
+			gJoyZ.Percent = s[2] * 100 / 1023
+			gJoyZ.Label = fmt.Sprintf("%d", s[2])
+			gClip.Percent = s[3] * 100 / 1023
+			gClip.Label = fmt.Sprintf("%d", s[3])
+			gGain.Percent = s[4] * 100 / 1023
+			gGain.Label = fmt.Sprintf("%d", s[4])
+			gHue.Percent = s[5] * 100 / 1023
+			gHue.Label = fmt.Sprintf("%d", s[5])
+			gTbar.Percent = s[6] * 100 / 1023
+			gTbar.Label = fmt.Sprintf("%d", s[6])
 			ui.Render(gTbar, gJoyX, gJoyY, gJoyZ, gClip, gGain, gHue)
 		case e := <-uiEvents:
 			switch e.ID {
@@ -158,8 +165,7 @@ func main() {
 func serialListen(port string, c chan string, adcChan chan []int) {
 	serialConfig := serial.Config{
 		Name:        port,
-		Baud:        38400,
-		Parity:      'O',
+		Baud:        57600,
 		Size:        8,
 		StopBits:    1,
 		ReadTimeout: time.Millisecond * 10,
@@ -199,7 +205,7 @@ func serialListen(port string, c chan string, adcChan chan []int) {
 
 				if (msg[0]&0xA0) == 0xA0 && (msg_field == 3) {
 					// Analog message
-					value := (int(msg[1]) * 8) + int(msg[2]>>5)
+					value := (int(msg[1]) * 8) + int(msg[2]>>4)
 					decode := ""
 					switch msg[0] {
 					case 0xA0:
